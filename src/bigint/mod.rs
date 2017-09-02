@@ -78,7 +78,7 @@ impl BigInt {
             }
         }
 
-        if self.digits.len() == 0 {
+        if self.digits.is_empty() {
             self.sign = Sign::Zero
         }
     }

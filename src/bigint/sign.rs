@@ -13,8 +13,7 @@ impl Mul<Sign> for Sign {
     fn mul(self, rhs: Sign) -> Self::Output {
         use self::Sign::*;
         match (self, rhs) {
-            (Zero, _) => Zero,
-            (_, Zero) => Zero,
+            (Zero, _) | (_, Zero) => Zero,
             (Positive, Positive) => Positive,
             (Negative, Negative) => Positive,
             (Positive, Negative) => Negative,
