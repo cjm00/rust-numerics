@@ -1,7 +1,15 @@
 pub use self::digit::{BigDigit, DoubleBigDigit, DIGIT_SIZE, BASE_10_PARSE_CHUNK_SIZE};
 
 
-#[cfg(target_pointer_width = "64")]
+#[cfg(thicc_ints)]
+mod digit {
+    pub type BigDigit = u64;
+    pub type DoubleBigDigit = u128;
+    pub const DIGIT_SIZE: usize = 64;
+    pub const BASE_10_PARSE_CHUNK_SIZE: usize = 16;
+}
+
+#[cfg(all(target_pointer_width = "64", not(thicc_ints)))]
 mod digit {
     pub type BigDigit = u32;
     pub type DoubleBigDigit = u64;
@@ -9,7 +17,7 @@ mod digit {
     pub const BASE_10_PARSE_CHUNK_SIZE: usize = 8;
 }
 
-#[cfg(target_pointer_width = "32")]
+#[cfg(all(target_pointer_width = "32", not(thicc_ints)))]
 mod digit {
     pub type BigDigit = u16;
     pub type DoubleBigDigit = u32;
