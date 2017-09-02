@@ -4,24 +4,17 @@ mod arithmetic;
 mod convert;
 mod digit;
 mod errors;
+mod sign;
 
 use rchunks::RChunks;
 
-use self::digit::{BigDigit, DoubleBigDigit};
+use self::digit::{BigDigit, DoubleBigDigit, BASE_10_PARSE_CHUNK_SIZE};
 use self::errors::BigIntParseError;
+use self::sign::Sign;
 
 use std::str::{self, FromStr};
 use std::ascii::AsciiExt;
 
-const PARSE_CHUNK_SIZE: usize = 8;
-
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Sign {
-    Positive,
-    Negative,
-    Zero,
-}
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct BigInt {
@@ -31,7 +24,6 @@ pub struct BigInt {
 
 
 impl BigInt {
-    #[cfg(target_arch = "x86_64")]
     pub fn from_str_radix<S: AsRef<str>>(s: S, radix: usize) -> Result<Self, BigIntParseError> {
         use self::errors::BigIntParseError::*;
 
@@ -45,7 +37,7 @@ impl BigInt {
         let radix_array: Vec<u32> = match radix {
             10 => s.as_ref()
                 .as_bytes()
-                .rchunks(PARSE_CHUNK_SIZE)
+                .rchunks(BASE_10_PARSE_CHUNK_SIZE)
                 .map(|c| u32::from_str(str::from_utf8(c).unwrap()).unwrap())
                 .collect(),
             _ => unimplemented!(),
@@ -57,7 +49,7 @@ impl BigInt {
         let mut output = BigInt::from(first);
 
         for r in radix_array_iter {
-            output = (output * (radix as u32).pow(PARSE_CHUNK_SIZE as u32)) + r;
+            output = (output * (radix as u32).pow(BASE_10_PARSE_CHUNK_SIZE as u32)) + r;
         }
 
         Ok(output)
@@ -68,6 +60,10 @@ impl BigInt {
             Sign::Zero => true,
             _ => false,
         }
+    }
+
+    pub fn zero() -> Self {
+        BigInt{sign: Sign::Zero, digits: vec![]}
     }
 
     pub(crate) fn lo_hi_digits(d: DoubleBigDigit) -> [BigDigit; 2] {
