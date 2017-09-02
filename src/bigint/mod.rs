@@ -34,11 +34,11 @@ impl BigInt {
             _ => unimplemented!(),
         }
 
-        let radix_array: Vec<u32> = match radix {
+        let radix_array: Vec<BigDigit> = match radix {
             10 => s.as_ref()
                 .as_bytes()
                 .rchunks(BASE_10_PARSE_CHUNK_SIZE)
-                .map(|c| u32::from_str(str::from_utf8(c).unwrap()).unwrap())
+                .map(|c| BigDigit::from_str(str::from_utf8(c).unwrap()).unwrap())
                 .collect(),
             _ => unimplemented!(),
 

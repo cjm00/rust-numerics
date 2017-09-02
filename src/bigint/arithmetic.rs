@@ -1,7 +1,7 @@
 use bigint::{BigInt, Sign};
 use bigint::digit::{BigDigit, DoubleBigDigit};
 
-use std::ops::{Add, Mul, Neg};
+use std::ops::{Add, Mul, Neg, Sub};
 
 impl Neg for BigInt {
     type Output = Self;
@@ -50,6 +50,23 @@ impl Add<BigDigit> for BigInt {
         }
 
         self
+    }
+}
+
+impl Sub<BigInt> for BigInt {
+    type Output = BigInt;
+
+    fn sub(mut self, rhs: BigInt) -> Self::Output {
+        sub::naive_sub(&mut self, rhs);
+        self
+    }
+}
+
+
+pub(crate) mod sub {
+    use super::BigInt;
+    pub fn naive_sub(lhs: &mut BigInt, rhs: BigInt) {
+        unimplemented!()
     }
 }
 
