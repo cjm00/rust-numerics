@@ -1,4 +1,5 @@
 use std::ops::{Mul, Neg};
+use std::cmp::{PartialOrd, Ord, Ordering};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Sign {
@@ -31,6 +32,28 @@ impl Neg for Sign {
             Zero => Zero,
             Negative => Negative,
             Positive => Positive,
+        }
+    }
+}
+
+impl PartialOrd<Sign> for Sign {
+    fn partial_cmp(&self, rhs: &Sign) -> Option<Ordering> {
+        Some(self.cmp(rhs))
+    }
+}
+
+impl Ord for Sign {
+    fn cmp(&self, other: &Self) -> Ordering {
+        use self::Ordering::*;
+        use self::Sign::*;
+        match (*self, *other) {
+            (Positive, Positive) => Equal,
+            (Zero, Zero) => Equal,
+            (Negative, Negative) => Equal,
+            (Positive, _) => Greater,
+            (_, Positive) => Less,
+            (Negative, _) => Less,
+            (_, Negative) => Greater,
         }
     }
 }

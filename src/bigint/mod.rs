@@ -8,12 +8,13 @@ mod sign;
 
 use rchunks::RChunks;
 
-use self::digit::{BigDigit, DoubleBigDigit, BASE_10_PARSE_CHUNK_SIZE};
+use self::digit::{BASE_10_PARSE_CHUNK_SIZE, BigDigit, DoubleBigDigit};
 use self::errors::BigIntParseError;
 use self::sign::Sign;
 
 use std::str::{self, FromStr};
 use std::ascii::AsciiExt;
+use std::cmp::{Ord, Ordering, PartialOrd};
 
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -41,7 +42,6 @@ impl BigInt {
                 .map(|c| BigDigit::from_str(str::from_utf8(c).unwrap()).unwrap())
                 .collect(),
             _ => unimplemented!(),
-
         };
 
         let mut radix_array_iter = radix_array.iter().rev().cloned();
@@ -63,7 +63,10 @@ impl BigInt {
     }
 
     pub fn zero() -> Self {
-        BigInt{sign: Sign::Zero, digits: vec![]}
+        BigInt {
+            sign: Sign::Zero,
+            digits: vec![],
+        }
     }
 
     pub(crate) fn lo_hi_digits(d: DoubleBigDigit) -> [BigDigit; 2] {
@@ -83,6 +86,53 @@ impl BigInt {
         }
     }
 }
+
+impl PartialOrd for BigInt {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+
+impl Ord for BigInt {
+    fn cmp(&self, other: &Self) -> Ordering {
+        use self::Ordering::*;
+        use self::Sign::*;
+
+        let sgn = match (self.sign.cmp(&other.sign), self.sign) {
+            (Greater, _) => return Greater,
+            (Less, _) => return Less,
+            (Equal, Zero) => return Equal,
+            (Equal, Negative) => Negative,
+            (Equal, Positive) => Positive,
+        };
+
+        if sgn == Positive {
+            self.digits.len().cmp(&other.digits.len()).then_with(|| {
+                for (s, o) in self.digits.iter().zip(other.digits.iter()).rev() {
+                    match s.cmp(o) {
+                        Greater => return Greater,
+                        Less => return Less,
+                        Equal => continue,
+                    }
+                }
+                Equal
+            })
+        } else {
+            self.digits.len().cmp(&other.digits.len()).reverse().then_with(|| {
+                for (s, o) in self.digits.iter().zip(other.digits.iter()).rev() {
+                    match s.cmp(o) {
+                        Greater => return Less,
+                        Less => return Greater,
+                        Equal => continue,
+                    }
+                }
+                Equal
+            })
+        }
+    }
+}
+
 
 impl FromStr for BigInt {
     type Err = BigIntParseError;
@@ -113,7 +163,10 @@ fn trim_test() {
 #[test]
 fn from_str_radix_test_1() {
     let s = "22209053970854587616243584284722270";
-    let a = BigInt{sign: Sign::Positive, digits: vec![779322462, 594349670, 2880689586, 280317]};
+    let a = BigInt {
+        sign: Sign::Positive,
+        digits: vec![779322462, 594349670, 2880689586, 280317],
+    };
     let b = BigInt::from_str_radix(s, 10).unwrap();
     assert_eq!(a, b);
 }
