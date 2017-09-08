@@ -5,16 +5,13 @@ mod convert;
 mod digit;
 mod errors;
 mod sign;
+mod parse;
 
-use rchunks::RChunks;
 
-use self::digit::{ BigDigit, DoubleBigDigit};
-use self::digit::constants::BASE_10_PARSE_CHUNK_SIZE;
+use self::digit::{BigDigit, DoubleBigDigit};
 use self::errors::BigIntParseError;
 use self::sign::Sign;
 
-use std::str::{self, FromStr};
-use std::ascii::AsciiExt;
 use std::cmp::{Ord, Ordering, PartialOrd};
 
 
@@ -26,38 +23,6 @@ pub struct BigInt {
 
 
 impl BigInt {
-    pub fn from_str_radix<S: AsRef<str>>(s: S, radix: usize) -> Result<Self, BigIntParseError> {
-        use self::errors::BigIntParseError::*;
-
-        let s = s.as_ref();
-
-        match radix {
-            10 => if !s.is_ascii_digit() {
-                return Err(InvalidCharacters);
-            },
-            _ => unimplemented!(),
-        }
-
-        let radix_array: Vec<BigDigit> = match radix {
-            10 => s
-                .as_bytes()
-                .rchunks(BASE_10_PARSE_CHUNK_SIZE)
-                .map(|c| BigDigit::from_str(str::from_utf8(c).unwrap()).unwrap())
-                .collect(),
-            _ => unimplemented!(),
-        };
-
-        let mut radix_array_iter = radix_array.iter().rev().cloned();
-        let first = radix_array_iter.next().unwrap();
-        let mut output = BigInt::from(first);
-
-        for r in radix_array_iter {
-            output = (output * (radix as u32).pow(BASE_10_PARSE_CHUNK_SIZE as u32)) + r;
-        }
-
-        Ok(output)
-    }
-
     pub fn is_zero(&self) -> bool {
         match self.sign {
             Sign::Zero => true,
@@ -157,7 +122,7 @@ impl FromStr for BigInt {
 
 #[test]
 fn lo_hi_digit_test() {
-    use self::digit::DIGIT_SIZE;
+    use bigint::digit::constants::DIGIT_SIZE;
     let mut a: DoubleBigDigit = 2;
     a = a.pow(DIGIT_SIZE as u32 + 2);
 
@@ -166,6 +131,7 @@ fn lo_hi_digit_test() {
 
 #[test]
 fn trim_test() {
+    use bigint::sign::Sign;
     let mut z = BigInt {
         sign: Sign::Positive,
         digits: vec![0; 50],
@@ -176,22 +142,26 @@ fn trim_test() {
 
 #[test]
 fn from_str_radix_test_1() {
+    use bigint::sign::Sign;
+    use std::str::FromStr;
     let s = "22209053970854587616243584284722270";
     let a = BigInt {
         sign: Sign::Positive,
         digits: vec![779322462, 594349670, 2880689586, 280317],
     };
-    let b = BigInt::from_str_radix(s, 10).unwrap();
+    let b = BigInt::from_str(s).unwrap();
     assert_eq!(a, b);
 }
 
 #[test]
 fn from_str_radix_test_2() {
+    use bigint::sign::Sign;
+    use std::str::FromStr;
     let s = "-22209053970854587616243584284722270";
     let a = BigInt {
-        sign: Sign::Positive,
+        sign: Sign::Negative,
         digits: vec![779322462, 594349670, 2880689586, 280317],
     };
-    let b = BigInt::from_str_radix(s, 10).unwrap();
+    let b = BigInt::from_str(s).unwrap();
     assert_eq!(a, b);
 }

@@ -7,6 +7,7 @@ static TEST_VECTOR: &str = include_str!("./test_vectors/mul_test.txt");
 #[test]
 fn mul_test_vector_test() {
     use numerics::bigint::BigInt;
+    use std::str::FromStr;
 
     for line in TEST_VECTOR.lines() {
         let mut ele = line.split_whitespace();
@@ -15,9 +16,9 @@ fn mul_test_vector_test() {
             ele.next().unwrap(),
             ele.next().unwrap(),
         );
-        let a = BigInt::from_str_radix(a, 10).unwrap();
-        let b = BigInt::from_str_radix(b, 10).unwrap();
-        let c = BigInt::from_str_radix(c, 10).unwrap();
+        let a = BigInt::from_str(a).unwrap();
+        let b = BigInt::from_str(b).unwrap();
+        let c = BigInt::from_str(c).unwrap();
         assert_eq!(a * b, c);
     }
 }

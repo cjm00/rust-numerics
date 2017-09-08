@@ -221,6 +221,8 @@ impl Add<BigDigit> for BigInt {
 
 #[test]
 fn add_test_1() {
+    use bigint::sign::Sign;
+
     let a = 0u32.wrapping_sub(1);
     let a_big = BigInt::from(a);
     let b_big = BigInt::from(a);
@@ -239,6 +241,8 @@ fn add_test_1() {
 #[cfg(target_arch = "x86_64")]
 #[test]
 fn scalar_mul_test_1() {
+    use bigint::sign::Sign;
+    
     let y: u32 = 915327;
 
     let a = BigInt {
