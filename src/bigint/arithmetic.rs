@@ -1,4 +1,5 @@
-use bigint::{BigInt, Sign};
+use bigint::BigInt;
+use bigint::Sign::*;
 use bigint::digit::{BigDigit, DoubleBigDigit};
 
 use std::ops::{Add, Mul, Neg, Sub};
@@ -6,12 +7,7 @@ use std::ops::{Add, Mul, Neg, Sub};
 impl Neg for BigInt {
     type Output = Self;
     fn neg(mut self) -> Self::Output {
-        self.sign = match self.sign {
-            Sign::Positive => Sign::Negative,
-            Sign::Negative => Sign::Positive,
-            Sign::Zero => Sign::Zero,
-        };
-
+        self.sign = -self.sign;
         self
     }
 }
@@ -21,53 +17,80 @@ impl Add<BigInt> for BigInt {
     type Output = BigInt;
     fn add(self, rhs: BigInt) -> Self::Output {
         match (self.sign, rhs.sign) {
-            (Sign::Positive, Sign::Positive) => add::strict_pos_overflow_add(self, rhs),
-            _ => unimplemented!(),
+            (Positive, Positive) => add::strict_pos_overflow_add(self, rhs),
+            (Positive, Negative) => self - (-rhs),
+            (Zero, _) => rhs,
+            (_, Zero) => self,
+            (Negative, Positive) => rhs - self,
+            (Negative, Negative) => -(-self + -rhs),
         }
     }
 }
 
-impl Add<BigDigit> for BigInt {
-    type Output = BigInt;
-    fn add(mut self, rhs: BigDigit) -> Self::Output {
-        if self.is_zero() {
-            self.digits.push(rhs);
-            return self;
-        }
-        let (res, mut carry) = self.digits[0].overflowing_add(rhs);
-        self.digits[0] = res;
-
-        let mut index = 1usize;
-        while carry && (index < self.digits.len()) {
-            let (r, c) = self.digits[index].overflowing_add(1);
-            self.digits[index] = r;
-            carry = c;
-            index += 1;
-        }
-
-        if carry {
-            self.digits.push(1);
-        }
-
-        self
-    }
-}
 
 impl Sub<BigInt> for BigInt {
     type Output = BigInt;
 
     fn sub(mut self, rhs: BigInt) -> Self::Output {
-        sub::naive_sub(&mut self, rhs);
-        self
+        match (self.sign, rhs.sign) {
+            (Positive, Positive) => {
+                sub::naive_sub(&mut self, &rhs);
+                self
+            }
+            (Positive, Zero) => self,
+            (Positive, Negative) => (self + -rhs),
+            (Zero, _) => -rhs,
+            (Negative, Positive) => -(-self + rhs),
+            (Negative, Zero) => self,
+            (Negative, Negative) => {
+                sub::naive_sub(&mut self, &rhs);
+                self
+            }
+        }
     }
 }
 
 
 pub(crate) mod sub {
     use super::BigInt;
-    pub fn naive_sub(lhs: &mut BigInt, rhs: BigInt) {
-        unimplemented!()
+    pub fn naive_sub(lhs: &mut BigInt, rhs: &BigInt) {
+        if *lhs >= *rhs {
+            let mut carry = false;
+
+            for (l, r) in lhs.digits.iter_mut().zip(rhs.digits.iter().cloned()) {
+                let (res, c) = l.overflowing_sub(r);
+                let (res, d) = if carry {
+                    res.overflowing_sub(1)
+                } else {
+                    (res, false)
+                };
+                *l = res;
+                carry = c || d;
+            }
+        } else {
+            let new_len = ::std::cmp::max(lhs.digits.len(), rhs.digits.len());
+            lhs.digits.resize(new_len, 0);
+
+            let mut carry = false;
+
+            for (l, r) in lhs.digits.iter_mut().zip(rhs.digits.iter().cloned()) {
+                let (res, c) = r.overflowing_sub(*l);
+                let (res, d) = if carry {
+                    res.overflowing_sub(1)
+                } else {
+                    (res, false)
+                };
+                *l = res;
+                carry = c || d;
+            }
+
+            lhs.negate();
+        }
+
+        lhs.trim();
     }
+
+
 }
 
 impl Mul<BigDigit> for BigInt {
@@ -168,6 +191,32 @@ pub(crate) mod add {
         }
     }
 
+}
+
+impl Add<BigDigit> for BigInt {
+    type Output = BigInt;
+    fn add(mut self, rhs: BigDigit) -> Self::Output {
+        if self.is_zero() {
+            self.digits.push(rhs);
+            return self;
+        }
+        let (res, mut carry) = self.digits[0].overflowing_add(rhs);
+        self.digits[0] = res;
+
+        let mut index = 1usize;
+        while carry && (index < self.digits.len()) {
+            let (r, c) = self.digits[index].overflowing_add(1);
+            self.digits[index] = r;
+            carry = c;
+            index += 1;
+        }
+
+        if carry {
+            self.digits.push(1);
+        }
+
+        self
+    }
 }
 
 #[test]
