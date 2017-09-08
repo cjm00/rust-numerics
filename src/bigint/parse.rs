@@ -20,11 +20,12 @@ impl FromStr for BigInt {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         use super::BigIntParseError::*;
-        if s.is_empty() {return Err(EmptyInput)}
+        if s.is_empty() {
+            return Err(EmptyInput);
+        }
 
         let builder = BigIntBuilder::parse_from_str(&s)?;
         Ok(builder.to_bigint())
-        
     }
 }
 
@@ -53,7 +54,9 @@ impl<'a> BigIntBuilder<'a> {
         let radix_vec: Vec<BigDigit> = self.digit_str
             .as_bytes()
             .rchunks(chunk_size_from_radix(radix).unwrap())
-            .map(|c| BigDigit::from_str(str::from_utf8(c).unwrap()).unwrap())
+            .map(|c| {
+                BigDigit::from_str_radix(str::from_utf8(c).unwrap(), radix).unwrap()
+            })
             .collect();
 
         let mut radix_vec_iter = radix_vec.into_iter().rev();
@@ -95,9 +98,9 @@ named!(determine_radix<&str, u32>,
 );
 
 named!(hex<&str, u32>,
-do_parse!(
-    tag!("0x") >>
-    (16)
+    do_parse!(
+        tag!("0x") >>
+        (16)
 ));
 
 named!(octal<&str, u32>,
@@ -115,3 +118,14 @@ named!(binary<&str, u32>,
 named!(decimal<&str, u32>,
     value!(10)
 );
+
+#[test]
+fn binary_parse_test_1() {
+    let s = "0b1000100111010001011001011111101001111000";
+    let s_int = BigInt::from_str(s).unwrap();
+    let q_int = BigInt {
+        sign: Sign::Positive,
+        digits: vec![0b11010001011001011111101001111000, 0b10001001],
+    };
+    assert_eq!(s_int, q_int);
+}
