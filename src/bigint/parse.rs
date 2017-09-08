@@ -22,7 +22,7 @@ impl FromStr for BigInt {
         use super::BigIntParseError::*;
         if s.is_empty() {return Err(EmptyInput)}
 
-        let builder = BigIntBuilder::parse_from_str(&s).unwrap();
+        let builder = BigIntBuilder::parse_from_str(&s)?;
         Ok(builder.to_bigint())
         
     }
