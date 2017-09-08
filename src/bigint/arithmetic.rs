@@ -15,9 +15,12 @@ impl Neg for BigInt {
 
 impl Add<BigInt> for BigInt {
     type Output = BigInt;
-    fn add(self, rhs: BigInt) -> Self::Output {
+    fn add(mut self, rhs: BigInt) -> Self::Output {
         match (self.sign, rhs.sign) {
-            (Positive, Positive) => add::strict_pos_overflow_add(self, rhs),
+            (Positive, Positive) => {
+                add::naive_add(&mut self, &rhs);
+                self
+            }
             (Positive, Negative) => self - (-rhs),
             (Zero, _) => rhs,
             (_, Zero) => self,
@@ -42,10 +45,7 @@ impl Sub<BigInt> for BigInt {
             (Zero, _) => -rhs,
             (Negative, Positive) => -(-self + rhs),
             (Negative, Zero) => self,
-            (Negative, Negative) => {
-                sub::naive_sub(&mut self, &rhs);
-                self
-            }
+            (Negative, Negative) => -(-self - -rhs),
         }
     }
 }
@@ -158,23 +158,29 @@ pub(crate) mod mul {
 pub(crate) mod add {
     use bigint::BigInt;
     use bigint::digit::BigDigit;
+    use std::iter;
 
-    pub fn strict_pos_overflow_add(mut lhs: BigInt, mut rhs: BigInt) -> BigInt {
-        if lhs.digits.len() >= rhs.digits.len() {
-            lhs.digits.push(0);
-            for (i, d) in rhs.digits.iter().cloned().enumerate() {
-                ripple_add(&mut lhs.digits[i..], d);
-            }
-            lhs.trim();
-            lhs
-        } else {
-            rhs.digits.push(0);
-            for (i, d) in lhs.digits.iter().cloned().enumerate() {
-                ripple_add(&mut rhs.digits[i..], d);
-            }
-            rhs.trim();
-            rhs
+    pub fn naive_add(lhs: &mut BigInt, rhs: &BigInt) {
+        let new_len = ::std::cmp::max(lhs.digits.len(), rhs.digits.len());
+        lhs.digits.resize(new_len, 0);
+        let mut carry = false;
+        for (l, r) in lhs.digits
+            .iter_mut()
+            .zip(rhs.digits.iter().cloned().chain(iter::once(0)))
+        {
+            let (res, c) = l.overflowing_add(r);
+            let (res, d) = if carry {
+                res.overflowing_add(1)
+            } else {
+                (res, false)
+            };
+            *l = res;
+            carry = c || d;
         }
+        if carry {
+            lhs.digits.push(1)
+        }
+        lhs.trim();
     }
 
     pub fn ripple_add(lhs: &mut [BigDigit], rhs: BigDigit) {
@@ -241,7 +247,7 @@ fn add_test_1() {
 #[test]
 fn scalar_mul_test_1() {
     use bigint::sign::Sign;
-    
+
     let y: u32 = 915327;
 
     let a = BigInt {
