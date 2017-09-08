@@ -86,7 +86,7 @@ named!(parse_bigint<&str, BigIntBuilder>,
 named!(determine_sign<&str, Sign>,
     alt_complete!(
         value!(Sign::Negative, tag!("-")) |
-        value!(Sign::Positive)
+        value!(Sign::Positive, opt!(tag!("+")))
     )
 );
 
