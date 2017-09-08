@@ -129,3 +129,10 @@ fn binary_parse_test_1() {
     };
     assert_eq!(s_int, q_int);
 }
+
+#[test]
+fn negative_parse_test_1() {
+    let s = "-23829156530705788460756766611112583774068015949399";
+    let s_int = BigInt::from_str(s).unwrap();
+    assert!(s_int.is_negative());
+}
