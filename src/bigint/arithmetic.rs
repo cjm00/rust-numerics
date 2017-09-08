@@ -158,16 +158,12 @@ pub(crate) mod mul {
 pub(crate) mod add {
     use bigint::BigInt;
     use bigint::digit::BigDigit;
-    use std::iter;
 
     pub fn naive_add(lhs: &mut BigInt, rhs: &BigInt) {
         let new_len = ::std::cmp::max(lhs.digits.len(), rhs.digits.len());
         lhs.digits.resize(new_len, 0);
         let mut carry = false;
-        for (l, r) in lhs.digits
-            .iter_mut()
-            .zip(rhs.digits.iter().cloned().chain(iter::once(0)))
-        {
+        for (l, r) in lhs.digits.iter_mut().zip(rhs.digits.iter().cloned()) {
             let (res, c) = l.overflowing_add(r);
             let (res, d) = if carry {
                 res.overflowing_add(1)
