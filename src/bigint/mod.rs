@@ -164,6 +164,7 @@ fn trim_test() {
     assert!(z.is_zero());
 }
 
+#[cfg(all(target_pointer_width = "64", not(feature = "thicc_ints")))]
 #[test]
 fn from_str_radix_test_1() {
     use bigint::sign::Sign;
@@ -177,6 +178,7 @@ fn from_str_radix_test_1() {
     assert_eq!(a, b);
 }
 
+#[cfg(all(target_pointer_width = "64", not(feature = "thicc_ints")))]
 #[test]
 fn from_str_radix_test_2() {
     use bigint::sign::Sign;

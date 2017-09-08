@@ -12,12 +12,15 @@ pub mod div;
 fn add_test_1() {
     use bigint::sign::Sign;
 
-    let a = 0u32.wrapping_sub(1);
+    let a: BigDigit = 0;
+    let a = a.wrapping_sub(1);
+
     let a_big = BigInt::from(a);
     let b_big = BigInt::from(a);
     let c_big = a_big + b_big;
 
-    let z = 0u32.wrapping_sub(2);
+    let z: BigDigit = 0;
+    let z = z.wrapping_sub(2);
 
     let c_fixed = BigInt {
         sign: Sign::Positive,
@@ -27,7 +30,7 @@ fn add_test_1() {
     assert_eq!(c_big, c_fixed);
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_pointer_width = "64", not(feature = "thicc_ints")))]
 #[test]
 fn scalar_mul_test_1() {
     use bigint::sign::Sign;

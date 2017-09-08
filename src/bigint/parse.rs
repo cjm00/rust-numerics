@@ -65,7 +65,7 @@ impl<'a> BigIntBuilder<'a> {
         output.sign = sign;
 
         for r in radix_vec_iter {
-            output = (output * radix.pow(chunk_size_from_radix(radix).unwrap() as u32)) + r;
+            output = (output * (radix as BigDigit).pow(chunk_size_from_radix(radix).unwrap() as u32)) + r;
         }
         output
     }
@@ -119,6 +119,7 @@ named!(decimal<&str, u32>,
     value!(10)
 );
 
+#[cfg(all(target_pointer_width = "64", not(feature = "thicc_ints")))]
 #[test]
 fn binary_parse_test_1() {
     let s = "0b1000100111010001011001011111101001111000";

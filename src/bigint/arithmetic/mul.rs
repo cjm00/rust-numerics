@@ -37,6 +37,13 @@ impl Mul<u32> for BigInt {
     }
 }
 
+impl Mul<u64> for BigInt {
+    type Output = BigInt;
+    fn mul(self, rhs: u64) -> Self::Output {
+        self * BigInt::from(rhs)
+    }
+}
+
 
 
  

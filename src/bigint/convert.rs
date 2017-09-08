@@ -18,3 +18,17 @@ macro_rules! impl_from_unsigned {
 
 impl_from_unsigned!(u8, u16, u32);
 
+#[cfg(all(target_pointer_width = "64", not(feature = "thicc_ints")))]
+impl From<u64> for BigInt {
+    fn from(src: u64) -> Self {
+        let [lo, hi]: [u32; 2] = unsafe { ::std::mem::transmute(src)};
+        BigInt{sign: Sign::Positive, digits: vec![lo, hi]}
+    }
+}
+
+#[cfg(feature = "thicc_ints")]
+impl From<u64> for BigInt {
+    fn from(src: u64) -> Self {
+        BigInt{sign: Sign::Positive, digits: vec![src as BigDigit]}
+    }
+}
