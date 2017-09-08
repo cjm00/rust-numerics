@@ -6,6 +6,7 @@ mod digit;
 mod errors;
 mod sign;
 mod parse;
+mod format;
 
 
 use self::digit::{BigDigit, DoubleBigDigit};
