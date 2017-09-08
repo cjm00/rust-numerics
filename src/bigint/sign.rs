@@ -30,8 +30,8 @@ impl Neg for Sign {
         use self::Sign::*;
         match self {
             Zero => Zero,
-            Negative => Negative,
-            Positive => Positive,
+            Negative => Positive,
+            Positive => Negative,
         }
     }
 }

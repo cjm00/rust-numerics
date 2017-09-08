@@ -30,6 +30,20 @@ impl BigInt {
             _ => false,
         }
     }
+    
+    pub fn is_positive(&self) -> bool {
+        match self.sign {
+            Sign::Positive => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_negative(&self) -> bool {
+        match self.sign {
+            Sign::Negative => true,
+            _ => false,
+        }
+    }
 
     pub fn zero() -> Self {
         BigInt {

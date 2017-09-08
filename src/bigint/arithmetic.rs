@@ -83,7 +83,6 @@ pub(crate) mod sub {
                 *l = res;
                 carry = c || d;
             }
-
             lhs.negate();
         }
 
