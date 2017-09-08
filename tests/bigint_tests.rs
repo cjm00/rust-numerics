@@ -1,14 +1,14 @@
 extern crate numerics;
 
 
-static test_vec: &str = include_str!("./test_vectors/mul_test.txt");
+static TEST_VECTOR: &str = include_str!("./test_vectors/mul_test.txt");
 
 
 #[test]
 fn mul_test_vector_test() {
     use numerics::bigint::BigInt;
 
-    for line in test_vec.lines() {
+    for line in TEST_VECTOR.lines() {
         let mut ele = line.split_whitespace();
         let (a, b, c) = (
             ele.next().unwrap(),
