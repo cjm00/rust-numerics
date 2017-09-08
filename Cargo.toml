@@ -7,4 +7,5 @@ authors = ["Chris McDonald <mail.chris.mcdonald@gmail.com>"]
 nom = "^3"
 
 [features]
-thicc-ints = []
+thicc_ints = []
+bench = []

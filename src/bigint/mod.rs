@@ -16,7 +16,7 @@ use self::sign::Sign;
 use std::cmp::{Ord, Ordering, PartialOrd};
 
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct BigInt {
     sign: Sign,
     digits: Vec<BigDigit>,
