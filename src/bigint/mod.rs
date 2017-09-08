@@ -12,6 +12,7 @@ mod format;
 use self::digit::{BigDigit, DoubleBigDigit};
 use self::errors::BigIntParseError;
 use self::sign::Sign;
+use std::ops::Neg;
 
 use std::cmp::{Ord, Ordering, PartialOrd};
 
@@ -73,6 +74,14 @@ impl BigInt {
         if self.digits.is_empty() {
             self.sign = Sign::Zero
         }
+    }
+}
+
+impl Neg for BigInt {
+    type Output = Self;
+    fn neg(mut self) -> Self::Output {
+        self.sign = -self.sign;
+        self
     }
 }
 
