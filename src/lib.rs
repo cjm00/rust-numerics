@@ -4,6 +4,6 @@
 
 #[macro_use]
 extern crate nom;
+extern crate rchunks;
 
 pub mod bigint;
-mod rchunks;
