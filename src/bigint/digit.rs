@@ -71,3 +71,13 @@ mod digit {
 pub(crate) fn lo_hi_digits(d: DoubleBigDigit) -> [BigDigit; 2] {
         unsafe { ::std::mem::transmute(d) }
     }
+
+#[test]
+fn lo_hi_digit_test() {
+    use bigint::digit::constants::DIGIT_SIZE;
+    use bigint::digit::lo_hi_digits;
+    let mut a: DoubleBigDigit = 2;
+    a = a.pow(DIGIT_SIZE as u32 + 2);
+
+    assert_eq!([0, 4], lo_hi_digits(a));
+}

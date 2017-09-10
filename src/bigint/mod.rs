@@ -129,24 +129,6 @@ impl Ord for BigInt {
     }
 }
 
-/*
-impl FromStr for BigInt {
-    type Err = BigIntParseError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        unimplemented!()
-    }
-}
-*/
-
-#[test]
-fn lo_hi_digit_test() {
-    use bigint::digit::constants::DIGIT_SIZE;
-    let mut a: DoubleBigDigit = 2;
-    a = a.pow(DIGIT_SIZE as u32 + 2);
-
-    assert_eq!([0, 4], BigInt::lo_hi_digits(a));
-}
-
 #[test]
 fn trim_test() {
     use bigint::sign::Sign;
