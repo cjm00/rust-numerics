@@ -5,7 +5,7 @@ authors = ["Chris McDonald <mail.chris.mcdonald@gmail.com>"]
 
 [dependencies]
 nom = "^3"
-rchunks = { git = "https://github.com/cjm00/rchunks" }
+rchunks = "*"
 
 [features]
 thicc_ints = []
