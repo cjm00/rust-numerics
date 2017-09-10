@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-mod arithmetic;
+mod ops;
 mod convert;
 mod digit;
 mod errors;
