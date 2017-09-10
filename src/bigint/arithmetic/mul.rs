@@ -1,7 +1,7 @@
 use bigint::{BigDigit, BigInt, DoubleBigDigit};
 use bigint::Sign::*;
 
-use super::add::ripple_add;
+use bigint::digit::lo_hi_digits;
 
 use std::ops::Mul;
 
@@ -23,8 +23,7 @@ impl Mul<u32> for BigInt {
 
         let mut carry: BigDigit = 0;
         for d in self.digits.iter_mut() {
-            let [lo, hi] =
-                BigInt::lo_hi_digits((*d as DoubleBigDigit * rhs) + carry as DoubleBigDigit);
+            let [lo, hi] = lo_hi_digits((*d as DoubleBigDigit * rhs) + carry as DoubleBigDigit);
             *d = lo;
             carry = hi;
         }
@@ -51,13 +50,25 @@ pub fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
         return BigInt::zero();
     };
 
-    let mut digits = vec![0; lhs.digits.len() + rhs.digits.len() + 1];
+    let mut digits = vec![0; lhs.digits.len() + rhs.digits.len()];
+    let mut carry: BigDigit = 0;
 
     for (i, l) in lhs.digits.iter().cloned().enumerate() {
+        if l == 0 {
+            continue;
+        }
         for (j, r) in rhs.digits.iter().cloned().enumerate() {
-            let [lo, hi] = BigInt::lo_hi_digits(l as DoubleBigDigit * r as DoubleBigDigit);
-            ripple_add(&mut digits[i + j..], lo);
-            ripple_add(&mut digits[i + j + 1..], hi);
+            let [lo, hi] = lo_hi_digits(
+                l as DoubleBigDigit * r as DoubleBigDigit + digits[i + j] as DoubleBigDigit +
+                    carry as DoubleBigDigit,
+            );
+            digits[i + j] = lo;
+            if j + 1 != rhs.digits.len() {
+                carry = hi;
+            } else {
+                carry = 0;
+                digits[i + j + 1] = hi;
+            }
         }
     }
 
