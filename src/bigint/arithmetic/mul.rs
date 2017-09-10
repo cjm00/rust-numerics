@@ -1,4 +1,4 @@
-use bigint::{BigInt, BigDigit, DoubleBigDigit};
+use bigint::{BigDigit, BigInt, DoubleBigDigit};
 use bigint::Sign::*;
 
 use super::add::ripple_add;
@@ -45,28 +45,26 @@ impl Mul<u64> for BigInt {
 }
 
 
+pub fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
+    let sign = lhs.sign * rhs.sign;
+    if sign == Zero {
+        return BigInt::zero();
+    };
 
- 
-    pub fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
-        let sign = lhs.sign * rhs.sign;
-        if sign == Zero {
-            return BigInt::zero();
-        };
+    let mut digits = vec![0; lhs.digits.len() + rhs.digits.len() + 1];
 
-        let mut digits = vec![0; lhs.digits.len() + rhs.digits.len() + 1];
-
-        for (i, l) in lhs.digits.iter().cloned().enumerate() {
-            for (j, r) in rhs.digits.iter().cloned().enumerate() {
-                let [lo, hi] = BigInt::lo_hi_digits(l as DoubleBigDigit * r as DoubleBigDigit);
-                ripple_add(&mut digits[i + j..], lo);
-                ripple_add(&mut digits[i + j + 1..], hi);
-            }
+    for (i, l) in lhs.digits.iter().cloned().enumerate() {
+        for (j, r) in rhs.digits.iter().cloned().enumerate() {
+            let [lo, hi] = BigInt::lo_hi_digits(l as DoubleBigDigit * r as DoubleBigDigit);
+            ripple_add(&mut digits[i + j..], lo);
+            ripple_add(&mut digits[i + j + 1..], hi);
         }
-
-        let mut out = BigInt { sign, digits };
-        out.trim();
-        out
     }
+
+    let mut out = BigInt { sign, digits };
+    out.trim();
+    out
+}
 
 
 #[cfg(all(target_pointer_width = "64", not(feature = "thicc_ints")))]
@@ -86,4 +84,30 @@ fn scalar_mul_test_1() {
     };
 
     assert_eq!(a * y, b);
+}
+
+#[cfg(all(test, feature = "bench"))]
+mod bench {
+    extern crate test;
+
+    #[bench]
+    fn public_mul_bench_300_digits(z: &mut test::Bencher) {
+        use std::str::FromStr;
+        use bigint::BigInt;
+        let a = BigInt::from_str(
+            "5456284523795942428469132284583767671501937037838739553621048584\
+             9697092671636555790748721976605446109138929406644601614207935832\
+             9964386445517985764609355606748230433631464221297015136886306912\
+             0150306437158735020650372401793455227707945470220316361023964964\
+             94196228645882096543957791225647308272136068",
+        ).unwrap();
+        let b = BigInt::from_str(
+            "8150042713655314982798403660314442131289517775633683156292882318\
+             5421703900831693849991210570000636926440830281144478400477822470\
+             0589121808067513932764450616107024538371323216631314068725835196\
+             6885199417956362386912275659558457477517193882086534714263124255\
+             28364107399545593257071086181824021275555532",
+        ).unwrap();
+        z.iter(|| &a + &b);
+    }
 }
