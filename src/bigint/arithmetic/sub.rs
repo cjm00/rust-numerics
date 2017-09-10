@@ -1,5 +1,5 @@
-use super::BigInt;
-use super::Sign::*;
+use bigint::BigInt;
+use bigint::Sign::*;
 
 use std::ops::Sub;
 

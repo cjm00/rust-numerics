@@ -1,5 +1,5 @@
-use super::{BigInt, BigDigit, DoubleBigDigit};
-use super::Sign::*;
+use bigint::{BigInt, BigDigit, DoubleBigDigit};
+use bigint::Sign::*;
 
 use super::add::ripple_add;
 
@@ -69,3 +69,21 @@ impl Mul<u64> for BigInt {
     }
 
 
+#[cfg(all(target_pointer_width = "64", not(feature = "thicc_ints")))]
+#[test]
+fn scalar_mul_test_1() {
+    use bigint::sign::Sign;
+
+    let y: u32 = 915327;
+
+    let a = BigInt {
+        sign: Sign::Positive,
+        digits: vec![3059078384, 2360247638, 2634550291, 6],
+    };
+    let b = BigInt {
+        sign: Sign::Positive,
+        digits: vec![356004624, 4070707789, 1201864523, 6053427],
+    };
+
+    assert_eq!(a * y, b);
+}
