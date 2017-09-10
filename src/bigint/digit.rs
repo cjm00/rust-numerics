@@ -69,8 +69,12 @@ mod digit {
 }
 
 pub(crate) fn lo_hi_digits(d: DoubleBigDigit) -> [BigDigit; 2] {
-        unsafe { ::std::mem::transmute(d) }
-    }
+    unsafe { ::std::mem::transmute(d) }
+}
+
+pub(crate) fn dbd_from_lo_hi(lh: [BigDigit; 2]) -> DoubleBigDigit {
+    unsafe { ::std::mem::transmute(lh) }
+}
 
 #[test]
 fn lo_hi_digit_test() {
