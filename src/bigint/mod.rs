@@ -57,10 +57,6 @@ impl BigInt {
         self.sign = -self.sign;
     }
 
-    pub(crate) fn lo_hi_digits(d: DoubleBigDigit) -> [BigDigit; 2] {
-        unsafe { ::std::mem::transmute(d) }
-    }
-
     fn trim(&mut self) {
         loop {
             match self.digits.last() {

@@ -67,3 +67,7 @@ mod digit {
         pub const BASE_10_PARSE_CHUNK_SIZE: usize = 4;
     }
 }
+
+pub(crate) fn lo_hi_digits(d: DoubleBigDigit) -> [BigDigit; 2] {
+        unsafe { ::std::mem::transmute(d) }
+    }
