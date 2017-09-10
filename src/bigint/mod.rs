@@ -64,11 +64,9 @@ impl BigInt {
     fn trim(&mut self) {
         loop {
             match self.digits.last() {
-                Some(&0) => {
-                    self.digits.pop();
-                }
+                Some(&0) => self.digits.pop(),
                 _ => break,
-            }
+            };
         }
 
         if self.digits.is_empty() {
