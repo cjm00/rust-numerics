@@ -53,6 +53,13 @@ impl BigInt {
         }
     }
 
+    pub fn one() -> Self {
+        BigInt {
+            sign: Sign::Positive,
+            digits: vec![1]
+        }
+    }
+
     pub fn negate(&mut self) {
         self.sign = -self.sign;
     }
