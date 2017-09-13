@@ -7,6 +7,7 @@ use std::iter;
 
 impl ShlAssign<usize> for BigInt {
     fn shl_assign(&mut self, rhs: usize) {
+        if rhs == 0 {return}
         let (digit_shift, bit_shift) = (rhs / DIGIT_SIZE, rhs % DIGIT_SIZE);
         // TODO: Update with .insert_slice() when that exists.
         let extend_size = digit_shift + 1;
@@ -48,6 +49,7 @@ impl<'a> Shl<usize> for &'a BigInt {
 
 impl ShrAssign<usize> for BigInt {
     fn shr_assign(&mut self, rhs: usize) {
+        if rhs == 0 {return}
         let (digit_shift, bit_shift) = (rhs / DIGIT_SIZE, rhs % DIGIT_SIZE);
 
         unsafe {
@@ -60,6 +62,7 @@ impl ShrAssign<usize> for BigInt {
                 *ds.offset((i.saturating_sub(digit_shift).saturating_sub(1)) as isize) |= lo;
                 *ds.offset((i.saturating_sub(digit_shift)) as isize) = hi;
             }
+        self.trim();
         }
     }
 }
