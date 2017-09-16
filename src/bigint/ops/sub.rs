@@ -29,8 +29,8 @@ impl Sub<BigInt> for BigInt {
 pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
     let mut carry = false;
 
-    for (l, r) in lhs.iter_mut().zip(rhs.iter()) {
-        let (res, c) = l.overflowing_sub(*r);
+    for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned()) {
+        let (res, c) = l.overflowing_sub(r);
         let (res, d) = if carry {res.overflowing_sub(1)} else {(res, false)};
         *l = res;
         carry = c || d;
