@@ -47,7 +47,7 @@ pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
 
 }
 
-pub(crate) fn ssub_digit(lhs: &mut[BigDigit], rhs: BigDigit) -> bool {
+pub(crate) fn ssub_digit(lhs: &mut [BigDigit], rhs: BigDigit) -> bool {
     assert!(!lhs.is_empty());
 
     let (res, mut carry) = lhs[0].overflowing_sub(rhs);
@@ -55,11 +55,21 @@ pub(crate) fn ssub_digit(lhs: &mut[BigDigit], rhs: BigDigit) -> bool {
 
     let mut index = 1;
     while index < lhs.len() {
+        if !carry {break}
         let (res, c) = lhs[index].overflowing_sub(1);
         lhs[index] = res;
         carry = c;
         index += 1;
     }
     carry
+}
+
+
+#[test]
+fn ssub_digit_test() {
+    let mut foo = [0, 0, 5, 5];
+    let res = [BigDigit::max_value(), BigDigit::max_value(), 4, 5];
+    assert!(!ssub_digit(&mut foo, 1));
+    assert_eq!(foo, res);
 }
 
