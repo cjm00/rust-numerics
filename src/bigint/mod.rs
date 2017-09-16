@@ -1,3 +1,5 @@
+//! A flexible and fast BigInteger implementation.
+
 #![allow(dead_code)]
 
 mod ops;
@@ -16,7 +18,7 @@ use std::ops::Neg;
 
 use std::cmp::{Ord, Ordering, PartialOrd};
 
-
+/// An arbitrary size integer
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct BigInt {
     sign: Sign,
@@ -25,7 +27,8 @@ pub struct BigInt {
 
 
 impl BigInt {
-        
+
+    /// Returns true if the BigInt is zero and false otherwise;   
     #[inline]
     pub fn is_zero(&self) -> bool {
         match self.sign {
@@ -34,6 +37,7 @@ impl BigInt {
         }
     }
     
+    /// Returns true if the BigInt is strictly greater than zero.
     #[inline]
     pub fn is_positive(&self) -> bool {
         match self.sign {
@@ -42,6 +46,7 @@ impl BigInt {
         }
     }
     
+    /// Returns true if the BigInt is strictly less than zero.
     #[inline]
     pub fn is_negative(&self) -> bool {
         match self.sign {
@@ -50,14 +55,13 @@ impl BigInt {
         }
     }
 
+    /// Returns a BigInt with a value of zero.
     #[inline]
     pub fn zero() -> Self {
-        BigInt {
-            sign: Sign::Zero,
-            digits: vec![],
-        }
+        BigInt::from(0u8)
     }
 
+    /// Returns a BigInt with a value of positive 1.
     #[inline]
     pub fn one() -> Self {
         BigInt {
@@ -66,6 +70,7 @@ impl BigInt {
         }
     }
     
+    /// Changes self to have the opposite sign. No change if self is zero.
     #[inline]
     pub fn negate(&mut self) {
         self.sign = -self.sign;
