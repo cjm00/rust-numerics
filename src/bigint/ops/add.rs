@@ -9,8 +9,10 @@ impl Add<BigInt> for BigInt {
     fn add(mut self, rhs: BigInt) -> Self::Output {
         match (self.sign, rhs.sign) {
             (Positive, Positive) => {
-                naive_add(&mut self, &rhs);
-                self
+                self.grow_to_hold(rhs.digits.len());
+                let carry = sadd(&mut self.digits, &rhs.digits);
+                self.digits.push(carry as BigDigit);
+                self.trimmed()
             }
             (Positive, Negative) => self - (-rhs),
             (Zero, _) => rhs,
@@ -27,11 +29,11 @@ impl<'a, 'b> Add<&'b BigInt> for &'a BigInt {
     fn add(self, rhs: &'b BigInt) -> BigInt {
         if self >= rhs {
             let mut output = self.clone();
-            naive_add(&mut output, rhs);
+            add_and_grow(&mut output, rhs);
             output
         } else {
             let mut output = rhs.clone();
-            naive_add(&mut output, self);
+            add_and_grow(&mut output, self);
             output
         }
     }
@@ -63,39 +65,23 @@ impl Add<BigDigit> for BigInt {
     }
 }
 
+fn add_and_grow(lhs: &mut BigInt, rhs: &BigInt) {
+    lhs.grow_to_hold(rhs.digits.len());
+    let grow = sadd(&mut lhs.digits, &rhs.digits);
+    if grow {lhs.digits.push(1)}
+    lhs.trim()
+}
 
-    pub fn naive_add(lhs: &mut BigInt, rhs: &BigInt) {
-        let new_len = ::std::cmp::max(lhs.digits.len(), rhs.digits.len());
-        lhs.digits.resize(new_len, 0);
-        let mut carry = false;
-        for (l, r) in lhs.digits.iter_mut().zip(rhs.digits.iter().cloned()) {
-            let (res, c) = l.overflowing_add(r);
-            let (res, d) = if carry {
-                res.overflowing_add(1)
-            } else {
-                (res, false)
-            };
-            *l = res;
-            carry = c || d;
-        }
-        if carry {
-            lhs.digits.push(1)
-        }
-        lhs.trim();
+pub(crate) fn sadd(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
+    let mut carry = false;
+    for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned()) {
+        let (res, c) = l.overflowing_add(r);
+        let (res, d) = if carry {res.overflowing_add(1)} else {(res, false)};
+        *l = res;
+        carry = c || d;
     }
-
-    pub fn ripple_add(lhs: &mut [BigDigit], rhs: BigDigit) {
-        assert!(lhs.len() >= 2);
-        let (res, mut carry) = lhs[0].overflowing_add(rhs);
-        lhs[0] = res;
-        let mut index = 1;
-        while carry {
-            let (r, c) = lhs[index].overflowing_add(1);
-            carry = c;
-            lhs[index] = r;
-            index += 1;
-        }
-    }
+    carry
+}
 
 
 #[test]
