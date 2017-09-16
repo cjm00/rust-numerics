@@ -19,6 +19,7 @@ mod digit {
     }
 
     pub mod constants {
+        pub const DIGIT_MAX: u64 = ::std::u64::MAX;
         pub const DIGIT_SIZE: usize = 64;
         pub const BASE_2_PARSE_CHUNK_SIZE: usize = 62;
         pub const BASE_8_PARSE_CHUNK_SIZE: usize = 20;
@@ -46,7 +47,7 @@ mod digit {
     }
 
     pub mod constants {
-
+        pub const DIGIT_MAX: u32 = ::std::u32::MAX;
         pub const DIGIT_SIZE: usize = 32;
         pub const BASE_2_PARSE_CHUNK_SIZE: usize = 31;
         pub const BASE_8_PARSE_CHUNK_SIZE: usize = 10;
@@ -63,6 +64,7 @@ mod digit {
     pub type DoubleBigDigit = u32;
 
     pub mod constants {
+        pub const DIGIT_MAX: u16 = ::std::u16::MAX;
         pub const DIGIT_SIZE: usize = 16;
         pub const BASE_10_PARSE_CHUNK_SIZE: usize = 4;
     }

@@ -25,6 +25,8 @@ pub struct BigInt {
 
 
 impl BigInt {
+        
+    #[inline]
     pub fn is_zero(&self) -> bool {
         match self.sign {
             Sign::Zero => true,
@@ -32,13 +34,15 @@ impl BigInt {
         }
     }
     
+    #[inline]
     pub fn is_positive(&self) -> bool {
         match self.sign {
             Sign::Positive => true,
             _ => false,
         }
     }
-
+    
+    #[inline]
     pub fn is_negative(&self) -> bool {
         match self.sign {
             Sign::Negative => true,
@@ -46,6 +50,7 @@ impl BigInt {
         }
     }
 
+    #[inline]
     pub fn zero() -> Self {
         BigInt {
             sign: Sign::Zero,
@@ -53,40 +58,57 @@ impl BigInt {
         }
     }
 
+    #[inline]
     pub fn one() -> Self {
         BigInt {
             sign: Sign::Positive,
-            digits: vec![1]
+            digits: vec![1],
         }
     }
-
+    
+    #[inline]
     pub fn negate(&mut self) {
         self.sign = -self.sign;
     }
 
+    #[inline]
     fn trim(&mut self) {
-        loop {
-            match self.digits.last() {
-                Some(&0) => self.digits.pop(),
-                _ => break,
-            };
+        while let Some(&0) = self.digits.last() {
+            self.digits.pop();
         }
 
         if self.digits.is_empty() {
             self.sign = Sign::Zero
         }
     }
+
+    /// Returns self with all leading zeroes removed.
+    #[inline]
+    fn trimmed(mut self) -> Self {
+        self.trim();
+        self
+    }
+
+    /// Extends this BigInt to have at least `size` digits. Does nothing if this already has at least `size` digits.     
+    #[inline]
+    fn grow_to_hold(&mut self, size: usize) {
+        if size > self.digits.len() {
+            self.digits.resize(size, 0);
+        }
+    }
 }
 
 impl Neg for BigInt {
-    type Output = Self;
+    type Output = Self; 
+    #[inline]
     fn neg(mut self) -> Self::Output {
         self.sign = -self.sign;
         self
     }
 }
 
-impl PartialOrd for BigInt {
+impl PartialOrd for BigInt { 
+    #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
