@@ -19,14 +19,7 @@ impl Mul<u32> for BigInt {
             return self;
         }
 
-        let rhs = rhs as DoubleBigDigit;
-
-        let mut carry: BigDigit = 0;
-        for d in self.digits.iter_mut() {
-            let [lo, hi] = lo_hi_digits((*d as DoubleBigDigit * rhs) + carry as DoubleBigDigit);
-            *d = lo;
-            carry = hi;
-        }
+        let carry = smul(&mut self.digits, rhs);
 
         if carry != 0 {
             self.digits.push(carry);
@@ -75,6 +68,18 @@ pub fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
     let mut out = BigInt { sign, digits };
     out.trim();
     out
+}
+
+/// Multiplies a slice by a constant, returning the carry.
+pub(crate) fn smul(lhs: &mut [BigDigit], rhs: BigDigit) -> BigDigit {
+        let rhs = rhs as DoubleBigDigit;
+        let mut carry: BigDigit = 0;
+        for d in lhs.iter_mut() {
+            let [lo, hi] = lo_hi_digits((*d as DoubleBigDigit * rhs) + carry as DoubleBigDigit);
+            *d = lo;
+            carry = hi;
+        }
+        carry
 }
 
 

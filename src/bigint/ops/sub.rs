@@ -25,8 +25,8 @@ impl Sub<BigInt> for BigInt {
 
 
 /// "Slice subract", subtracts lhs from rhs in-place and returns whether or not a borrow and complement occurred
-#[inline]
 pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
+    assert!(lhs.len() >= rhs.len());
     let mut carry = false;
 
     for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned()) {
@@ -47,4 +47,19 @@ pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
 
 }
 
+pub(crate) fn ssub_digit(lhs: &mut[BigDigit], rhs: BigDigit) -> bool {
+    assert!(!lhs.is_empty());
+
+    let (res, mut carry) = lhs[0].overflowing_sub(rhs);
+    lhs[0] = res;
+
+    let mut index = 1;
+    while index < lhs.len() {
+        let (res, c) = lhs[index].overflowing_sub(1);
+        lhs[index] = res;
+        carry = c;
+        index += 1;
+    }
+    carry
+}
 
