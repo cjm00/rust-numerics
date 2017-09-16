@@ -14,8 +14,8 @@ mod format;
 use self::digit::{BigDigit, DoubleBigDigit};
 use self::errors::BigIntParseError;
 use self::sign::Sign;
-use std::ops::Neg;
 
+use std::ops::Neg;
 use std::cmp::{Ord, Ordering, PartialOrd};
 
 /// An arbitrary size integer
@@ -74,6 +74,11 @@ impl BigInt {
     #[inline]
     pub fn negate(&mut self) {
         self.sign = -self.sign;
+    }
+
+    /// Returns a tuple of the quotient and remainder of self divided by the argument.
+    pub fn div_mod(&self, rhs: &BigInt) -> (BigInt, BigInt) {
+        ops::div::divmod(self.clone(), rhs.clone())
     }
 
     #[inline]
