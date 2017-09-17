@@ -105,17 +105,3 @@ fn add_test_1() {
 
     assert_eq!(c_big, c_fixed);
 }
-
-#[cfg(all(test, feature = "bench"))]
-mod bench {
-    extern crate test;
-    
-    #[bench]
-    fn public_add_bench_100(z: &mut test::Bencher) {
-        use std::str::FromStr;
-        use ::bigint::BigInt;
-        let a = BigInt::from_str("5605552357266437729280504134296683206097961396781567121352972852719206640545169925410820532634965117").unwrap();
-        let b = BigInt::from_str("4247965229701346452175430137483132154566023748284704589458094199981810537483023545986277408132789499").unwrap();
-        z.iter(|| &a + &b);
-    }
-}
