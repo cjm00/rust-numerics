@@ -91,12 +91,14 @@ impl<'a> Shr<usize> for &'a BigInt {
 #[test]
 fn shl_equivalency_test() {
     use bigint::BigInt;
+    use bigint::digit::BigDigit;
     use std::str::FromStr;
     let q = BigInt::from_str("49744649234615701185995702667471447085682723150956").unwrap();
 
     for t in 0..30usize {
         let z = q.clone();
         let y = q.clone();
-        assert_eq!(z * 2u32.pow(t as u32), y << t);
+        let q: BigDigit = 2;
+        assert_eq!(z * q.pow(t as u32), y << t);
     }
 }

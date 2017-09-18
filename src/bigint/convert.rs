@@ -22,10 +22,12 @@ impl_from_unsigned!(u8, u16, u32);
 impl From<u64> for BigInt {
     fn from(src: u64) -> Self {
         let [lo, hi]: [u32; 2] = unsafe { ::std::mem::transmute(src) };
-        BigInt {
+        let out = BigInt {
             sign: Sign::Positive,
             digits: vec![lo, hi],
-        }
+        };
+
+        out.trimmed()
     }
 }
 

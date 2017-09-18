@@ -15,9 +15,9 @@ impl<'a, 'b> Mul<&'a BigInt> for &'b BigInt {
     fn mul(self, rhs: &'a BigInt) -> Self::Output { naive_mul(self, rhs) }
 }
 
-impl Mul<u32> for BigInt {
+impl Mul<BigDigit> for BigInt {
     type Output = BigInt;
-    fn mul(mut self, rhs: u32) -> Self::Output {
+    fn mul(mut self, rhs: BigDigit) -> Self::Output {
         if self.is_zero() || rhs == 0 {
             return BigInt::zero();
         }
@@ -30,11 +30,6 @@ impl Mul<u32> for BigInt {
 
         self
     }
-}
-
-impl Mul<u64> for BigInt {
-    type Output = BigInt;
-    fn mul(self, rhs: u64) -> Self::Output { self * BigInt::from(rhs) }
 }
 
 
