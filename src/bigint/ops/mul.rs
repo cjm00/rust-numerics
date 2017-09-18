@@ -7,16 +7,19 @@ use std::ops::Mul;
 
 impl Mul<BigInt> for BigInt {
     type Output = BigInt;
-    fn mul(self, rhs: BigInt) -> Self::Output {
-        naive_mul(&self, &rhs)
-    }
+    fn mul(self, rhs: BigInt) -> Self::Output { naive_mul(&self, &rhs) }
+}
+
+impl<'a, 'b> Mul<&'a BigInt> for &'b BigInt {
+    type Output = BigInt;
+    fn mul(self, rhs: &'a BigInt) -> Self::Output { naive_mul(self, rhs) }
 }
 
 impl Mul<u32> for BigInt {
     type Output = BigInt;
     fn mul(mut self, rhs: u32) -> Self::Output {
-        if self.is_zero() {
-            return self;
+        if self.is_zero() || rhs == 0 {
+            return BigInt::zero();
         }
 
         let carry = smul(&mut self.digits, rhs);
@@ -31,21 +34,23 @@ impl Mul<u32> for BigInt {
 
 impl Mul<u64> for BigInt {
     type Output = BigInt;
-    fn mul(self, rhs: u64) -> Self::Output {
-        self * BigInt::from(rhs)
-    }
+    fn mul(self, rhs: u64) -> Self::Output { self * BigInt::from(rhs) }
 }
 
 
 pub(crate) fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
     let sign = lhs.sign * rhs.sign;
-    if sign == Zero {return BigInt::zero()}
+    if sign == Zero {
+        return BigInt::zero();
+    }
 
     let mut digits = vec![0; lhs.digits.len() + rhs.digits.len()];
     let mut carry: BigDigit = 0;
 
     for (i, l) in lhs.digits.iter().cloned().enumerate() {
-        if l == 0 {continue}
+        if l == 0 {
+            continue;
+        }
         for (j, r) in rhs.digits.iter().cloned().enumerate() {
             let [lo, hi] = lo_hi_digits(
                 l as DoubleBigDigit * r as DoubleBigDigit + digits[i + j] as DoubleBigDigit +
@@ -68,14 +73,14 @@ pub(crate) fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
 
 /// Multiplies a slice by a constant, returning the carry.
 pub(crate) fn smul(lhs: &mut [BigDigit], rhs: BigDigit) -> BigDigit {
-        let rhs = rhs as DoubleBigDigit;
-        let mut carry: BigDigit = 0;
-        for d in lhs.iter_mut() {
-            let [lo, hi] = lo_hi_digits((*d as DoubleBigDigit * rhs) + carry as DoubleBigDigit);
-            *d = lo;
-            carry = hi;
-        }
-        carry
+    let rhs = rhs as DoubleBigDigit;
+    let mut carry: BigDigit = 0;
+    for d in lhs.iter_mut() {
+        let [lo, hi] = lo_hi_digits((*d as DoubleBigDigit * rhs) + carry as DoubleBigDigit);
+        *d = lo;
+        carry = hi;
+    }
+    carry
 }
 
 

@@ -27,8 +27,7 @@ pub struct BigInt {
 
 
 impl BigInt {
-
-    /// Returns true if the BigInt is zero and false otherwise;   
+    /// Returns true if the BigInt is zero and false otherwise;
     #[inline]
     pub fn is_zero(&self) -> bool {
         match self.sign {
@@ -36,7 +35,7 @@ impl BigInt {
             _ => false,
         }
     }
-    
+
     /// Returns true if the BigInt is strictly greater than zero.
     #[inline]
     pub fn is_positive(&self) -> bool {
@@ -45,7 +44,7 @@ impl BigInt {
             _ => false,
         }
     }
-    
+
     /// Returns true if the BigInt is strictly less than zero.
     #[inline]
     pub fn is_negative(&self) -> bool {
@@ -57,9 +56,7 @@ impl BigInt {
 
     /// Returns a BigInt with a value of zero.
     #[inline]
-    pub fn zero() -> Self {
-        BigInt::from(0u8)
-    }
+    pub fn zero() -> Self { BigInt::from(0u8) }
 
     /// Returns a BigInt with a value of positive 1.
     #[inline]
@@ -69,14 +66,13 @@ impl BigInt {
             digits: vec![1],
         }
     }
-    
+
     /// Changes self to have the opposite sign. No change if self is zero.
     #[inline]
-    pub fn negate(&mut self) {
-        self.sign = -self.sign;
-    }
+    pub fn negate(&mut self) { self.sign = -self.sign; }
 
-    /// Returns a tuple of the quotient and remainder of self divided by the argument.
+    /// Returns a tuple of the quotient and remainder of self divided by the
+    /// argument.
     pub fn div_mod(&self, rhs: &BigInt) -> (BigInt, BigInt) {
         ops::div::divmod(self.clone(), rhs.clone())
     }
@@ -99,7 +95,8 @@ impl BigInt {
         self
     }
 
-    /// Extends this BigInt to have at least `size` digits. Does nothing if this already has at least `size` digits.     
+    /// Extends this BigInt to have at least `size` digits. Does nothing if
+    /// this already has at least `size` digits.
     #[inline]
     fn grow_to_hold(&mut self, size: usize) {
         if size > self.digits.len() {
@@ -109,7 +106,7 @@ impl BigInt {
 }
 
 impl Neg for BigInt {
-    type Output = Self; 
+    type Output = Self;
     #[inline]
     fn neg(mut self) -> Self::Output {
         self.sign = -self.sign;
@@ -117,11 +114,9 @@ impl Neg for BigInt {
     }
 }
 
-impl PartialOrd for BigInt { 
+impl PartialOrd for BigInt {
     #[inline]
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
 }
 
 

@@ -26,7 +26,7 @@ impl Add<BigInt> for BigInt {
 
 impl<'a, 'b> Add<&'b BigInt> for &'a BigInt {
     type Output = BigInt;
-    fn add(self, rhs: &'b BigInt) -> BigInt {
+    fn add(self, rhs: &'b BigInt) -> Self::Output {
         if self >= rhs {
             let mut output = self.clone();
             add_and_grow(&mut output, rhs);
@@ -39,6 +39,14 @@ impl<'a, 'b> Add<&'b BigInt> for &'a BigInt {
     }
 }
 
+impl<'a> Add<&'a BigInt> for BigInt {
+    type Output = BigInt;
+    fn add(mut self, rhs: &'a BigInt) -> Self::Output {
+        add_and_grow(&mut self, rhs);
+        self
+    }
+}
+
 impl Add<BigDigit> for BigInt {
     type Output = BigInt;
     fn add(mut self, rhs: BigDigit) -> Self::Output {
@@ -47,15 +55,19 @@ impl Add<BigDigit> for BigInt {
             return self;
         }
         let carry = sadd_digit(&mut self.digits, rhs);
-        if carry {self.digits.push(1)}
+        if carry {
+            self.digits.push(1)
+        }
         self
     }
 }
 
-fn add_and_grow(lhs: &mut BigInt, rhs: &BigInt) {
+pub(crate) fn add_and_grow(lhs: &mut BigInt, rhs: &BigInt) {
     lhs.grow_to_hold(rhs.digits.len());
     let grow = sadd(&mut lhs.digits, &rhs.digits);
-    if grow {lhs.digits.push(1)}
+    if grow {
+        lhs.digits.push(1)
+    }
     lhs.trim()
 }
 
@@ -63,7 +75,7 @@ pub(crate) fn sadd(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
     let mut carry = false;
     for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned()) {
         let (res, c) = l.overflowing_add(r);
-        let (res, d) = if carry {res.overflowing_add(1)} else {(res, false)};
+        let (res, d) = if carry { res.overflowing_add(1) } else { (res, false) };
         *l = res;
         carry = c || d;
     }
@@ -75,7 +87,9 @@ pub(crate) fn sadd_digit(lhs: &mut [BigDigit], rhs: BigDigit) -> bool {
     let mut carry = rhs;
 
     for ele in lhs.iter_mut() {
-        if carry == 0 {return false;}
+        if carry == 0 {
+            return false;
+        }
         let (res, c) = ele.overflowing_add(carry);
         *ele = res;
         carry = c as BigDigit;

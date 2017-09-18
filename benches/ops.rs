@@ -42,5 +42,3 @@ fn product_1000_decimal_digits(b: &mut test::Bencher) {
     let y = BigInt::from_str(l.next().unwrap()).unwrap();
     b.iter(|| &x * &y)
 }
-
-

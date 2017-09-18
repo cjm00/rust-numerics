@@ -8,9 +8,11 @@ use bigint::digit::constants::DIGIT_SIZE;
 impl Binary for BigInt {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match self.sign {
-            Positive => if f.sign_plus() {
-                write!(f, "+")?
-            },
+            Positive => {
+                if f.sign_plus() {
+                    write!(f, "+")?
+                }
+            }
             Negative => write!(f, "-")?,
             Zero => {}
         }

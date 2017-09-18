@@ -37,9 +37,7 @@ impl Neg for Sign {
 }
 
 impl PartialOrd<Sign> for Sign {
-    fn partial_cmp(&self, rhs: &Sign) -> Option<Ordering> {
-        Some(self.cmp(rhs))
-    }
+    fn partial_cmp(&self, rhs: &Sign) -> Option<Ordering> { Some(self.cmp(rhs)) }
 }
 
 impl Ord for Sign {
