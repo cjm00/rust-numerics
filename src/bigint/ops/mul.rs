@@ -37,7 +37,7 @@ impl Mul<u64> for BigInt {
 }
 
 
-pub fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
+pub(crate) fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
     let sign = lhs.sign * rhs.sign;
     if sign == Zero {return BigInt::zero()}
 
@@ -45,9 +45,7 @@ pub fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
     let mut carry: BigDigit = 0;
 
     for (i, l) in lhs.digits.iter().cloned().enumerate() {
-        if l == 0 {
-            continue;
-        }
+        if l == 0 {continue}
         for (j, r) in rhs.digits.iter().cloned().enumerate() {
             let [lo, hi] = lo_hi_digits(
                 l as DoubleBigDigit * r as DoubleBigDigit + digits[i + j] as DoubleBigDigit +
