@@ -39,9 +39,7 @@ impl Mul<u64> for BigInt {
 
 pub fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
     let sign = lhs.sign * rhs.sign;
-    if sign == Zero {
-        return BigInt::zero();
-    };
+    if sign == Zero {return BigInt::zero()}
 
     let mut digits = vec![0; lhs.digits.len() + rhs.digits.len()];
     let mut carry: BigDigit = 0;
