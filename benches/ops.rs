@@ -42,3 +42,14 @@ fn product_1000_decimal_digits(b: &mut test::Bencher) {
     let y = BigInt::from_str(l.next().unwrap()).unwrap();
     b.iter(|| &x * &y)
 }
+
+#[bench]
+fn divmod_1000_decimal_digits(b: &mut test::Bencher) {
+    let mut file = File::open("./benches/inputs/1000_50.txt").unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    let mut l = contents.lines();
+    let x = BigInt::from_str(l.next().unwrap()).unwrap();
+    let y = BigInt::from_str(l.next().unwrap()).unwrap();
+    b.iter(|| x.div_mod(&y))
+}
