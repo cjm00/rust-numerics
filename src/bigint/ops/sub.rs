@@ -49,19 +49,15 @@ pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
 
 pub(crate) fn ssub_digit(lhs: &mut [BigDigit], rhs: BigDigit) -> bool {
     assert!(!lhs.is_empty());
+    let mut carry = rhs;
 
-    let (res, mut carry) = lhs[0].overflowing_sub(rhs);
-    lhs[0] = res;
-
-    let mut index = 1;
-    while index < lhs.len() {
-        if !carry {break}
-        let (res, c) = lhs[index].overflowing_sub(1);
-        lhs[index] = res;
-        carry = c;
-        index += 1;
-    }
-    carry
+    for ele in lhs.iter_mut() {
+        if carry == 0 { return false; }
+        let (res, c) = ele.overflowing_sub(carry);
+        *ele = res;
+        carry = c as BigDigit;
+  }
+  carry != 0
 }
 
 

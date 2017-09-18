@@ -46,21 +46,8 @@ impl Add<BigDigit> for BigInt {
             self.digits.push(rhs);
             return self;
         }
-        let (res, mut carry) = self.digits[0].overflowing_add(rhs);
-        self.digits[0] = res;
-
-        let mut index = 1usize;
-        while carry && (index < self.digits.len()) {
-            let (r, c) = self.digits[index].overflowing_add(1);
-            self.digits[index] = r;
-            carry = c;
-            index += 1;
-        }
-
-        if carry {
-            self.digits.push(1);
-        }
-
+        let carry = sadd_digit(&mut self.digits, rhs);
+        if carry {self.digits.push(1)}
         self
     }
 }
@@ -81,6 +68,19 @@ pub(crate) fn sadd(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
         carry = c || d;
     }
     carry
+}
+
+pub(crate) fn sadd_digit(lhs: &mut [BigDigit], rhs: BigDigit) -> bool {
+    assert!(!lhs.is_empty());
+    let mut carry = rhs;
+
+    for ele in lhs.iter_mut() {
+        if carry == 0 {return false;}
+        let (res, c) = ele.overflowing_add(carry);
+        *ele = res;
+        carry = c as BigDigit;
+    }
+    carry != 0
 }
 
 
