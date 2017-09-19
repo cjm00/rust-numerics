@@ -56,7 +56,9 @@ impl BigInt {
 
     /// Returns a BigInt with a value of zero.
     #[inline]
-    pub fn zero() -> Self { BigInt::from(0u8) }
+    pub fn zero() -> Self {
+        BigInt::from(0u8)
+    }
 
     /// Returns a BigInt with a value of positive 1.
     #[inline]
@@ -69,7 +71,9 @@ impl BigInt {
 
     /// Changes self to have the opposite sign. No change if self is zero.
     #[inline]
-    pub fn negate(&mut self) { self.sign = -self.sign; }
+    pub fn negate(&mut self) {
+        self.sign = -self.sign;
+    }
 
     /// Returns a tuple of the quotient and remainder of self divided by the
     /// argument.
@@ -104,6 +108,14 @@ impl BigInt {
             self.digits.resize(size, 0);
         }
     }
+
+    fn from_vec(src: Vec<BigDigit>) -> Self {
+        let out = BigInt {
+            sign: Sign::Positive,
+            digits: src,
+        };
+        out.trimmed()
+    }
 }
 
 impl Neg for BigInt {
@@ -117,7 +129,9 @@ impl Neg for BigInt {
 
 impl PartialOrd for BigInt {
     #[inline]
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 
