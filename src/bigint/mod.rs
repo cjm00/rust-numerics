@@ -74,7 +74,8 @@ impl BigInt {
     /// Returns a tuple of the quotient and remainder of self divided by the
     /// argument.
     pub fn div_mod(&self, rhs: &BigInt) -> (BigInt, BigInt) {
-        ops::div::divmod(self.clone(), rhs.clone())
+        let (quo, rem) = ops::div::divmod(self.clone(), rhs.clone(), true);
+        (quo, rem.unwrap())
     }
 
     #[inline]

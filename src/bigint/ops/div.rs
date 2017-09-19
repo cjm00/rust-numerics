@@ -12,15 +12,23 @@ use std::ops::ShlAssign;
 
 
 /// Returns (lhs / rhs, remainder). This algorithm taken from TAOCP 4.3.1
-pub(crate) fn divmod(mut lhs: BigInt, mut rhs: BigInt) -> (BigInt, BigInt) {
+pub(crate) fn divmod(
+    mut lhs: BigInt,
+    mut rhs: BigInt,
+    return_remainder: bool,
+) -> (BigInt, Option<BigInt>) {
     assert!(!rhs.is_zero(), "Can't divide by zero");
     if lhs.is_zero() {
-        return (BigInt::zero(), BigInt::zero());
+        if return_remainder {
+            return (BigInt::zero(), Some(BigInt::zero()));
+        } else {
+            return (BigInt::zero(), None);
+        }
     }
     let cmp = lhs.cmp(&rhs);
     match cmp {
-        Equal => return (BigInt::one(), BigInt::zero()),
-        Less => return (BigInt::zero(), lhs.clone()),
+        Equal => return (BigInt::one(), Some(BigInt::zero())),
+        Less => return (BigInt::zero(), Some(lhs.clone())),
         Greater => (),
     }
 
@@ -52,7 +60,7 @@ pub(crate) fn divmod(mut lhs: BigInt, mut rhs: BigInt) -> (BigInt, BigInt) {
             loop {
                 if (qhat == b) ||
                     (qhat * v[n - 2] as DoubleBigDigit >
-                         (rhat * b) + u[j + n - 2] as DoubleBigDigit)
+                        (rhat * b) + u[j + n - 2] as DoubleBigDigit)
                 {
                     qhat -= 1;
                     rhat += v[n - 1] as DoubleBigDigit;
@@ -82,8 +90,12 @@ pub(crate) fn divmod(mut lhs: BigInt, mut rhs: BigInt) -> (BigInt, BigInt) {
         sign: Sign::Positive,
         digits: quotient,
     };
-    lhs.digits.truncate(rhs.digits.len());
-    (quo, lhs.trimmed() >> shift_size)
+    if return_remainder {
+        lhs.digits.truncate(rhs.digits.len());
+        (quo, Some(lhs.trimmed() >> shift_size))
+    } else {
+        (quo, None)
+    }
 }
 
 /// Sets lhs to lhs - q * rhs. If LHS is negative, it is left as the b's
@@ -99,7 +111,11 @@ fn ssub_with_mul(lhs: &mut [BigDigit], rhs: &[BigDigit], q: BigDigit) -> bool {
     assert_eq!(lhs.len(), rhs.len());
     for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned()) {
         let (res, c) = l.overflowing_sub(r);
-        let (res, d) = if carry { res.overflowing_sub(1) } else { (res, false) };
+        let (res, d) = if carry {
+            res.overflowing_sub(1)
+        } else {
+            (res, false)
+        };
         *l = res;
         carry = c || d;
     }
@@ -107,7 +123,9 @@ fn ssub_with_mul(lhs: &mut [BigDigit], rhs: &[BigDigit], q: BigDigit) -> bool {
     carry
 }
 
-fn normalization_shift_size(input: &BigInt) -> u32 { input.digits.last().unwrap().leading_zeros() }
+fn normalization_shift_size(input: &BigInt) -> u32 {
+    input.digits.last().unwrap().leading_zeros()
+}
 
 #[test]
 fn normalization_test() {
