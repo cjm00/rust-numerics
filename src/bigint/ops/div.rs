@@ -102,15 +102,15 @@ pub(crate) fn divmod(
             }
 
             quotient[j] = qhat as BigDigit;
-            zero_out(&mut scratch);
             scratch[..n].copy_from_slice(&v);
+            scratch[n] = 0;
             let borrow = ssub_with_mul(&mut u[j..j + n + 1], &mut scratch, qhat as BigDigit);
 
 
             if borrow {
                 ssub_digit(&mut quotient[j..], 1);
-                zero_out(&mut scratch);
                 scratch[..n].copy_from_slice(&v);
+                scratch[n] = 0;
                 let carry = sadd(&mut u[j..j + n], &scratch);
                 debug_assert_eq!(carry, true);
             }
@@ -155,12 +155,6 @@ fn ssub_with_mul(dividend: &mut [BigDigit], divisor: &mut [BigDigit], q: BigDigi
 
 fn normalization_shift_size(input: &BigInt) -> u32 {
     input.digits.last().unwrap().leading_zeros()
-}
-
-fn zero_out(src: &mut [BigDigit]) {
-    for item in src {
-        *item = 0;
-    }
 }
 
 #[test]
