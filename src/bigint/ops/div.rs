@@ -14,7 +14,7 @@ use std::ops::ShlAssign;
 
 
 pub(crate) fn short_divmod(dividend: &BigInt, divisor: BigDigit, return_remainder: bool) -> (BigInt, Option<BigDigit>) {
-    assert!(divisor != 0);
+    assert!(divisor != 0, "Can't divide by zero");
     if dividend.is_zero() {
         if return_remainder {
             return (BigInt::zero(), Some(0))
@@ -69,7 +69,7 @@ pub(crate) fn divmod(
     divisor.shl_assign(shift_size);
 
     let mut quotient: Vec<BigDigit>;
-
+    let mut scratch: Vec<BigDigit> = vec![0; divisor.digits.len() + 1];
     {
         // Constants for the division loop.
         let m = dividend.digits.len() - divisor.digits.len() - 1;
@@ -102,14 +102,16 @@ pub(crate) fn divmod(
             }
 
             quotient[j] = qhat as BigDigit;
-            let borrow = ssub_with_mul(&mut u[j..j + n + 1], &v[..], qhat as BigDigit);
+            zero_out(&mut scratch);
+            scratch[..n].copy_from_slice(&v);
+            let borrow = ssub_with_mul(&mut u[j..j + n + 1], &mut scratch, qhat as BigDigit);
 
 
             if borrow {
                 ssub_digit(&mut quotient[j..], 1);
-                let mut v_ex = v.to_owned();
-                v_ex.push(0);
-                let carry = sadd(&mut u[j..j + n], &v_ex[..]);
+                zero_out(&mut scratch);
+                scratch[..n].copy_from_slice(&v);
+                let carry = sadd(&mut u[j..j + n], &scratch);
                 debug_assert_eq!(carry, true);
             }
             j = j.wrapping_sub(1);
@@ -130,10 +132,8 @@ pub(crate) fn divmod(
 
 /// Sets dividend to dividend - q * divisor. If dividend is negative, it is left as the b's
 /// complement, where b is the radix of BigDigit.
-fn ssub_with_mul(dividend: &mut [BigDigit], divisor: &[BigDigit], q: BigDigit) -> bool {
-    let mut divisor: Vec<BigDigit> = divisor.into();
-    divisor.push(0);
-    let _carry = smul(&mut divisor, q);
+fn ssub_with_mul(dividend: &mut [BigDigit], divisor: &mut [BigDigit], q: BigDigit) -> bool {
+    let _carry = smul(divisor, q);
     debug_assert_eq!(_carry, 0);
 
     let mut carry = false;
@@ -155,6 +155,12 @@ fn ssub_with_mul(dividend: &mut [BigDigit], divisor: &[BigDigit], q: BigDigit) -
 
 fn normalization_shift_size(input: &BigInt) -> u32 {
     input.digits.last().unwrap().leading_zeros()
+}
+
+fn zero_out(src: &mut [BigDigit]) {
+    for item in src {
+        *item = 0;
+    }
 }
 
 #[test]
