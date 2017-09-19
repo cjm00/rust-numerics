@@ -21,10 +21,14 @@ mod digit {
     pub mod constants {
         pub const DIGIT_MAX: u64 = ::std::u64::MAX;
         pub const DIGIT_SIZE: usize = 64;
+
         pub const BASE_2_PARSE_CHUNK_SIZE: usize = 62;
         pub const BASE_8_PARSE_CHUNK_SIZE: usize = 20;
         pub const BASE_10_PARSE_CHUNK_SIZE: usize = 16;
         pub const BASE_16_PARSE_CHUNK_SIZE: usize = 16;
+
+        pub const BASE_10_FORMAT_CHUNK_SIZE: u64 = 1_000_000_000_000_000_000_0;
+        pub const BASE_10_FORMAT_PAD_SIZE: usize = 19;
     }
 
 }
@@ -49,10 +53,14 @@ mod digit {
     pub mod constants {
         pub const DIGIT_MAX: u32 = ::std::u32::MAX;
         pub const DIGIT_SIZE: usize = 32;
+
         pub const BASE_2_PARSE_CHUNK_SIZE: usize = 31;
         pub const BASE_8_PARSE_CHUNK_SIZE: usize = 10;
         pub const BASE_10_PARSE_CHUNK_SIZE: usize = 8;
         pub const BASE_16_PARSE_CHUNK_SIZE: usize = 8;
+
+        pub const BASE_10_FORMAT_CHUNK_SIZE: u32 = 1_000_000_000;
+        pub const BASE_10_FORMAT_PAD_SIZE: usize = 9;
 
     }
 }
@@ -77,6 +85,7 @@ pub(crate) fn lo_hi_digits(d: DoubleBigDigit) -> [BigDigit; 2] {
 pub(crate) fn dbd_from_lo_hi(lh: [BigDigit; 2]) -> DoubleBigDigit {
     unsafe { ::std::mem::transmute(lh) }
 }
+
 
 #[test]
 fn lo_hi_digit_test() {
