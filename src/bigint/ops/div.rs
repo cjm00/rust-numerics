@@ -8,8 +8,21 @@ use bigint::ops::add::sadd;
 use bigint::ops::sub::ssub_digit;
 
 use std::cmp::Ordering::*;
-use std::ops::ShlAssign;
+use std::ops::{ShlAssign, Div};
 
+impl Div<BigDigit> for BigInt {
+    type Output = BigInt;
+    fn div(self, rhs: BigDigit) -> Self::Output {
+        short_divmod(&self, rhs, false).0
+    }
+}
+
+impl<'a> Div<BigDigit> for &'a BigInt {
+    type Output = BigInt;
+    fn div(self, rhs: BigDigit) -> Self::Output {
+        short_divmod(self, rhs, false).0
+    }
+}
 
 
 
