@@ -25,7 +25,7 @@ impl FromStr for BigInt {
         }
 
         let builder = BigIntBuilder::parse_from_str(&s)?;
-        Ok(builder.to_bigint())
+        Ok(builder.into_bigint())
     }
 }
 
@@ -36,9 +36,9 @@ pub(crate) struct BigIntBuilder<'a> {
 }
 
 impl<'a> BigIntBuilder<'a> {
-    pub fn parse_from_str<'q, S: AsRef<str>>(
-        input: &'q S,
-    ) -> Result<BigIntBuilder<'q>, BigIntParseError> {
+    pub fn parse_from_str<'s, S: AsRef<str>>(
+        input: &'s S,
+    ) -> Result<BigIntBuilder<'s>, BigIntParseError> {
         let input = input.as_ref();
         match parse_bigint(input) {
             Done(_, u) => Ok(u),
@@ -47,7 +47,7 @@ impl<'a> BigIntBuilder<'a> {
         }
     }
 
-    pub fn to_bigint(self) -> BigInt {
+    pub fn into_bigint(self) -> BigInt {
         let sign = self.sign;
         let radix = self.radix;
 

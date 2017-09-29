@@ -115,14 +115,14 @@ pub(crate) fn divmod(
             }
 
             quotient[j] = qhat as BigDigit;
-            scratch[..n].copy_from_slice(&v);
+            scratch[..n].copy_from_slice(v);
             scratch[n] = 0;
             let borrow = ssub_with_mul(&mut u[j..j + n + 1], &mut scratch, qhat as BigDigit);
 
 
             if borrow {
                 ssub_digit(&mut quotient[j..], 1);
-                scratch[..n].copy_from_slice(&v);
+                scratch[..n].copy_from_slice(v);
                 scratch[n] = 0;
                 let carry = sadd(&mut u[j..j + n], &scratch);
                 debug_assert_eq!(carry, true);
