@@ -65,9 +65,8 @@ impl<'a> BigIntBuilder<'a> {
         output.sign = sign;
 
         for r in radix_vec_iter {
-            output = (output *
-                          (radix as BigDigit).pow(chunk_size_from_radix(radix).unwrap() as u32)) +
-                r;
+            output = 
+                (output * (radix as BigDigit).pow(chunk_size_from_radix(radix).unwrap() as u32)) + r;
         }
         output
     }
