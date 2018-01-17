@@ -6,7 +6,7 @@ use bigint::ops::add;
 use bigint::sign::Sign;
 
 use std::ops::Sub;
-
+use std::iter::repeat;
 
 impl Sub<BigInt> for BigInt {
     type Output = BigInt;
@@ -86,14 +86,14 @@ impl<'a> Sub<&'a BigInt> for BigInt {
 }
 
 
-
+// TODO: Optimize!
 /// "Slice subract", subtracts rhs from lhs in-place and returns
 /// the sign of the result.
 pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> Sign {
     assert!(lhs.len() >= rhs.len());
     let mut carry = false;
 
-    for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned()) {
+    for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned().chain(repeat(0))) {
         let (res, c) = l.overflowing_sub(r);
         let (res, d) = if carry { res.overflowing_sub(1) } else { (res, false) };
         *l = res;
