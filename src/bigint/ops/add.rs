@@ -72,6 +72,7 @@ pub(crate) fn add_and_grow(lhs: &mut BigInt, rhs: &BigInt) {
 }
 
 pub(crate) fn sadd(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
+    debug_assert!(lhs.len() >= rhs.len());
     let mut carry = false;
     for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned()) {
         let (res, c) = l.overflowing_add(r);

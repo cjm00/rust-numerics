@@ -1,9 +1,8 @@
 use bigint::BigInt;
-use bigint::digit::{BigDigit, DoubleBigDigit, from_lo_hi};
+use bigint::digit::{BigDigit, DoubleBigDigit, from_lo_hi, to_lo_hi};
 use bigint::digit::constants::DIGIT_MAX;
 use bigint::sign::Sign;
 
-use bigint::ops::mul::smul;
 use bigint::ops::add::sadd;
 use bigint::ops::sub::dsub;
 
@@ -82,7 +81,6 @@ pub(crate) fn divmod(
     divisor.shl_assign(shift_size);
 
     let mut quotient: Vec<BigDigit>;
-    let mut scratch: Vec<BigDigit> = vec![0; divisor.digits.len() + 1];
     {
         // Constants for the division loop.
         let m = dividend.digits.len() - divisor.digits.len() - 1;
@@ -115,16 +113,12 @@ pub(crate) fn divmod(
             }
 
             quotient[j] = qhat as BigDigit;
-            scratch[..n].copy_from_slice(v);
-            scratch[n] = 0;
-            let borrow = ssub_with_mul(&mut u[j..j + n + 1], &mut scratch, qhat as BigDigit);
+            let borrow = ssub_with_mul(&mut u[j..j + n + 1], v, qhat as BigDigit);
 
 
             if borrow {
                 dsub(&mut quotient[j..], 1);
-                scratch[..n].copy_from_slice(v);
-                scratch[n] = 0;
-                let carry = sadd(&mut u[j..j + n], &scratch);
+                let carry = sadd(&mut u[j..j + n], &v);
                 debug_assert_eq!(carry, true);
             }
             j = j.wrapping_sub(1);
@@ -145,24 +139,21 @@ pub(crate) fn divmod(
 
 /// Sets dividend to dividend - q * divisor. If dividend is negative, it is left as the b's
 /// complement, where b is the radix of BigDigit.
-fn ssub_with_mul(dividend: &mut [BigDigit], divisor: &mut [BigDigit], q: BigDigit) -> bool {
+fn ssub_with_mul(dividend: &mut [BigDigit], divisor: &[BigDigit], q: BigDigit) -> bool {
 
-    let _carry = smul(divisor, q);
-    let mut carry: bool = false;
+    debug_assert!(dividend.len() >= divisor.len());
 
-    assert_eq!(dividend.len(), divisor.len());
+    let mut carry: BigDigit = 0;
+
     for (l, r) in dividend.iter_mut().zip(divisor.iter().cloned()) {
-        let (res, c) = l.overflowing_sub(r);
-        let (res, d) = if carry {
-            res.overflowing_sub(1)
-        } else {
-            (res, false)
-        };
+        let [lo, mut hi] = to_lo_hi((r as DoubleBigDigit) * (q as DoubleBigDigit) + (carry as DoubleBigDigit));
+        let (res, j) = l.overflowing_sub(lo);
+        if j { hi += 1 }
         *l = res;
-        carry = c || d;
+        carry = hi;
     }
 
-    carry
+    carry != 0
 }
 
 fn normalization_shift_size(input: &BigInt) -> u32 {
