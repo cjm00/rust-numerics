@@ -2,6 +2,7 @@ use bigint::{BigInt, BigDigit};
 use bigint::Sign::*;
 
 use std::ops::Add;
+use std::iter::repeat;
 
 
 impl Add<BigInt> for BigInt {
@@ -71,10 +72,11 @@ pub(crate) fn add_and_grow(lhs: &mut BigInt, rhs: &BigInt) {
     lhs.trim()
 }
 
+// TODO: Optimize
 pub(crate) fn sadd(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
     debug_assert!(lhs.len() >= rhs.len());
     let mut carry = false;
-    for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned()) {
+    for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned().chain(repeat(0))) {
         let (res, c) = l.overflowing_add(r);
         let (res, d) = if carry { res.overflowing_add(1) } else { (res, false) };
         *l = res;
