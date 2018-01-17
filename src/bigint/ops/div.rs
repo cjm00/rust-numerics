@@ -5,7 +5,7 @@ use bigint::sign::Sign;
 
 use bigint::ops::mul::smul;
 use bigint::ops::add::sadd;
-use bigint::ops::sub::ssub_digit;
+use bigint::ops::sub::dsub;
 
 use std::cmp::Ordering::*;
 use std::ops::{ShlAssign, Div};
@@ -121,7 +121,7 @@ pub(crate) fn divmod(
 
 
             if borrow {
-                ssub_digit(&mut quotient[j..], 1);
+                dsub(&mut quotient[j..], 1);
                 scratch[..n].copy_from_slice(v);
                 scratch[n] = 0;
                 let carry = sadd(&mut u[j..j + n], &scratch);

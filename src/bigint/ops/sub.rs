@@ -3,6 +3,7 @@ use bigint::Sign::*;
 use bigint::digit::BigDigit;
 use bigint::digit::constants::DIGIT_MAX;
 use bigint::ops::add;
+use bigint::sign::Sign;
 
 use std::ops::Sub;
 
@@ -14,7 +15,7 @@ impl Sub<BigInt> for BigInt {
         match (self.sign, rhs.sign) {
             (Positive, Positive) => {
                 self.grow_to_hold(rhs.digits.len());
-                if ssub(&mut self.digits, &rhs.digits) {
+                if let Negative = ssub(&mut self.digits, &rhs.digits) {
                     -self.trimmed()
                 } else {
                     self.trimmed()
@@ -37,7 +38,7 @@ impl<'a, 'b> Sub<&'a BigInt> for &'b BigInt {
             (Positive, Positive) => {
                 let mut lhs = self.clone();
                 lhs.grow_to_hold(rhs.digits.len());
-                if ssub(&mut lhs.digits, &rhs.digits) {
+                if let Negative = ssub(&mut lhs.digits, &rhs.digits) {
                     -lhs.trimmed()
                 } else {
                     lhs.trimmed()
@@ -59,7 +60,7 @@ impl<'a> Sub<&'a BigInt> for BigInt {
         match (self.sign, rhs.sign) {
             (Positive, Positive) => {
                 self.grow_to_hold(rhs.digits.len());
-                if ssub(&mut self.digits, &rhs.digits) {
+                if let Negative = ssub(&mut self.digits, &rhs.digits) {
                     -self.trimmed()
                 } else {
                     self.trimmed()
@@ -74,7 +75,7 @@ impl<'a> Sub<&'a BigInt> for BigInt {
             (Negative, Positive) => -(-self + rhs),
             (Negative, Negative) => {
                 self.grow_to_hold(rhs.digits.len());
-                if ssub(&mut self.digits, &rhs.digits) {
+                if let Negative = ssub(&mut self.digits, &rhs.digits) {
                     -self.trimmed()
                 } else {
                     self.trimmed()
@@ -86,9 +87,9 @@ impl<'a> Sub<&'a BigInt> for BigInt {
 
 
 
-/// "Slice subract", subtracts lhs from rhs in-place and returns whether or not
-/// a borrow and complement occurred
-pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
+/// "Slice subract", subtracts rhs from lhs in-place and returns
+/// the sign of the result.
+pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> Sign {
     assert!(lhs.len() >= rhs.len());
     let mut carry = false;
 
@@ -106,11 +107,18 @@ pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
         lhs[0] += 1;
     }
 
-    carry
+    if carry {
+        Sign::Negative
+    } else if all_zero(lhs) {
+        Sign::Zero
+    } else {
+        Sign::Positive
+    }
 
 }
 
-pub(crate) fn ssub_digit(lhs: &mut [BigDigit], rhs: BigDigit) -> bool {
+/// "Digit subtract", subtracts rhs from lhs in-place and returns whether or not a borrow and carry occurred.
+pub(crate) fn dsub(lhs: &mut [BigDigit], rhs: BigDigit) -> bool {
     assert!(!lhs.is_empty());
     let mut carry = rhs;
 
@@ -125,11 +133,15 @@ pub(crate) fn ssub_digit(lhs: &mut [BigDigit], rhs: BigDigit) -> bool {
     carry != 0
 }
 
+fn all_zero(s: &[BigDigit]) -> bool {
+    s.iter().all(|&x| x == 0)
+}
+
 
 #[test]
-fn ssub_digit_test() {
+fn dsub_test() {
     let mut foo = [0, 0, 5, 5];
     let res = [BigDigit::max_value(), BigDigit::max_value(), 4, 5];
-    assert!(!ssub_digit(&mut foo, 1));
+    assert!(!dsub(&mut foo, 1));
     assert_eq!(foo, res);
 }
