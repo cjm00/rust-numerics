@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Chris McDonald <mail.chris.mcdonald@gmail.com>"]
 
 [dependencies]
-nom = "^3"
+nom = "3.2"
 rchunks = "*"
 
 [features]
