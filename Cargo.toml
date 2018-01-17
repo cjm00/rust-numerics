@@ -6,6 +6,10 @@ authors = ["Chris McDonald <mail.chris.mcdonald@gmail.com>"]
 [dependencies]
 nom = "3.2"
 rchunks = "*"
+rand = "0.4.2"
+
+[profile.test]
+opt-level = 1
 
 [features]
 thicc_ints = []

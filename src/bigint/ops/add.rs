@@ -1,8 +1,9 @@
-use bigint::{BigInt, BigDigit};
+use bigint::{BigInt, BigDigit, DoubleBigDigit};
 use bigint::Sign::*;
+use bigint::digit::{to_lo_hi};
 
 use std::ops::Add;
-use std::iter::repeat;
+
 
 
 impl Add<BigInt> for BigInt {
@@ -56,8 +57,8 @@ impl Add<BigDigit> for BigInt {
             return self;
         }
         let carry = sadd_digit(&mut self.digits, rhs);
-        if carry {
-            self.digits.push(1)
+        if carry > 0 {
+            self.digits.push(carry);
         }
         self
     }
@@ -66,38 +67,41 @@ impl Add<BigDigit> for BigInt {
 pub(crate) fn add_and_grow(lhs: &mut BigInt, rhs: &BigInt) {
     lhs.grow_to_hold(rhs.digits.len());
     let grow = sadd(&mut lhs.digits, &rhs.digits);
-    if grow {
-        lhs.digits.push(1)
+    if grow > 0 {
+        lhs.digits.push(grow);
     }
     lhs.trim()
 }
 
 // TODO: Optimize
-pub(crate) fn sadd(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> bool {
+pub(crate) fn sadd(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> BigDigit {
     debug_assert!(lhs.len() >= rhs.len());
-    let mut carry = false;
-    for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned().chain(repeat(0))) {
-        let (res, c) = l.overflowing_add(r);
-        let (res, d) = if carry { res.overflowing_add(1) } else { (res, false) };
-        *l = res;
-        carry = c || d;
+    let mut carry: BigDigit = 0;
+    let (l_lo, l_hi) = lhs.split_at_mut(rhs.len());
+    for (l, r) in l_lo.iter_mut().zip(rhs.iter().cloned()) {
+        let [lo, hi] = to_lo_hi(*l as DoubleBigDigit + r as DoubleBigDigit + carry as DoubleBigDigit);
+        *l = lo;
+        carry = hi;
+    }
+
+    if carry != 0 {
+        carry = sadd_digit(l_hi, carry);
     }
     carry
 }
 
-pub(crate) fn sadd_digit(lhs: &mut [BigDigit], rhs: BigDigit) -> bool {
-    assert!(!lhs.is_empty());
+pub(crate) fn sadd_digit(lhs: &mut [BigDigit], rhs: BigDigit) -> BigDigit {
     let mut carry = rhs;
 
     for ele in lhs.iter_mut() {
         if carry == 0 {
-            return false;
+            break;
         }
         let (res, c) = ele.overflowing_add(carry);
         *ele = res;
         carry = c as BigDigit;
     }
-    carry != 0
+    carry
 }
 
 

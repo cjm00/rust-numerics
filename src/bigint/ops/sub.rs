@@ -1,12 +1,11 @@
 use bigint::BigInt;
 use bigint::Sign::*;
-use bigint::digit::BigDigit;
+use bigint::digit::{BigDigit};
 use bigint::digit::constants::DIGIT_MAX;
 use bigint::ops::add;
 use bigint::sign::Sign;
 
 use std::ops::Sub;
-use std::iter::repeat;
 
 impl Sub<BigInt> for BigInt {
     type Output = BigInt;
@@ -93,11 +92,17 @@ pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> Sign {
     assert!(lhs.len() >= rhs.len());
     let mut carry = false;
 
-    for (l, r) in lhs.iter_mut().zip(rhs.iter().cloned().chain(repeat(0))) {
-        let (res, c) = l.overflowing_sub(r);
-        let (res, d) = if carry { res.overflowing_sub(1) } else { (res, false) };
-        *l = res;
-        carry = c || d;
+    {
+        let (l_lo, l_hi) = lhs.split_at_mut(rhs.len());
+        for (l, r) in l_lo.iter_mut().zip(rhs.iter().cloned()) {
+            let (res, c) = l.overflowing_sub(r);
+            let (res, d) = if carry { res.overflowing_sub(1) } else { (res, false) };
+            *l = res;
+            carry = c || d;
+        }
+        if carry {
+            carry = dsub(l_hi, 1);
+        }
     }
 
     if carry {
@@ -117,9 +122,15 @@ pub(crate) fn ssub(lhs: &mut [BigDigit], rhs: &[BigDigit]) -> Sign {
 
 }
 
+pub(crate) fn ssub_sign(lhs: &[BigDigit], rhs: &[BigDigit]) -> (Sign, Vec<BigDigit>) {
+    debug_assert!(lhs.len() >= rhs.len());
+    let mut output = lhs.to_owned();
+    let sign = ssub(&mut output, rhs);
+    (sign, output)
+}
+
 /// "Digit subtract", subtracts rhs from lhs in-place and returns whether or not a borrow and carry occurred.
 pub(crate) fn dsub(lhs: &mut [BigDigit], rhs: BigDigit) -> bool {
-    assert!(!lhs.is_empty());
     let mut carry = rhs;
 
     for ele in lhs.iter_mut() {

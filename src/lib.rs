@@ -8,5 +8,6 @@
 #[macro_use]
 extern crate nom;
 extern crate rchunks;
+extern crate rand;
 
 pub mod bigint;

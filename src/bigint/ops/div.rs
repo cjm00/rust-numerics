@@ -119,7 +119,7 @@ pub(crate) fn divmod(
             if borrow {
                 dsub(&mut quotient[j..], 1);
                 let carry = sadd(&mut u[j..j + n], &v);
-                debug_assert_eq!(carry, true);
+                debug_assert_eq!(carry, 1);
             }
             j = j.wrapping_sub(1);
         }
