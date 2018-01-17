@@ -1,5 +1,5 @@
 use bigint::BigInt;
-use bigint::digit::{dbd_from_lo_hi, lo_hi_digits, DoubleBigDigit};
+use bigint::digit::{from_lo_hi, to_lo_hi, DoubleBigDigit};
 use bigint::digit::constants::*;
 
 use std::ops::{Shl, ShlAssign, Shr, ShrAssign};
@@ -21,7 +21,7 @@ impl ShlAssign<usize> for BigInt {
             let ds = self.digits.as_mut_ptr();
             for i in (0..self.digits.len()).rev().skip(extend_size) {
                 let v = ds.offset(i as isize);
-                let [lo, hi] = lo_hi_digits((*v as DoubleBigDigit) << bit_shift);
+                let [lo, hi] = to_lo_hi((*v as DoubleBigDigit) << bit_shift);
                 *v = 0;
                 *ds.offset((i + digit_shift + 1) as isize) |= hi;
                 *ds.offset((i + digit_shift) as isize) = lo;
@@ -60,8 +60,8 @@ impl ShrAssign<usize> for BigInt {
             let ds = self.digits.as_mut_ptr();
             for i in (0..self.digits.len()).skip(digit_shift) {
                 let v = ds.offset(i as isize);
-                let shifted = dbd_from_lo_hi([0, *v]) >> bit_shift;
-                let [lo, hi] = lo_hi_digits(shifted);
+                let shifted = from_lo_hi([0, *v]) >> bit_shift;
+                let [lo, hi] = to_lo_hi(shifted);
                 *v = 0;
                 *ds.offset((i.saturating_sub(digit_shift).saturating_sub(1)) as isize) |= lo;
                 *ds.offset((i.saturating_sub(digit_shift)) as isize) = hi;

@@ -78,21 +78,27 @@ mod digit {
     }
 }
 
-pub(crate) fn lo_hi_digits(d: DoubleBigDigit) -> [BigDigit; 2] {
-    unsafe { ::std::mem::transmute(d) }
+#[inline]
+pub(crate) fn to_lo_hi(d: DoubleBigDigit) -> [BigDigit; 2] {
+    use self::constants::DIGIT_SIZE;
+
+    [ d as BigDigit, (d >> DIGIT_SIZE) as BigDigit ]
 }
 
-pub(crate) fn dbd_from_lo_hi(lh: [BigDigit; 2]) -> DoubleBigDigit {
-    unsafe { ::std::mem::transmute(lh) }
+#[inline]
+pub(crate) fn from_lo_hi(lh: [BigDigit; 2]) -> DoubleBigDigit {
+    use self::constants::DIGIT_SIZE;
+
+    (lh[0] as DoubleBigDigit) + ((lh[1] as DoubleBigDigit) << DIGIT_SIZE)
 }
 
 
 #[test]
 fn lo_hi_digit_test() {
     use bigint::digit::constants::DIGIT_SIZE;
-    use bigint::digit::lo_hi_digits;
+    use bigint::digit::to_lo_hi;
     let mut a: DoubleBigDigit = 2;
     a = a.pow(DIGIT_SIZE as u32 + 2);
 
-    assert_eq!([0, 4], lo_hi_digits(a));
+    assert_eq!([0, 4], to_lo_hi(a));
 }

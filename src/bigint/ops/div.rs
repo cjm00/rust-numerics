@@ -1,5 +1,5 @@
 use bigint::BigInt;
-use bigint::digit::{BigDigit, DoubleBigDigit, dbd_from_lo_hi};
+use bigint::digit::{BigDigit, DoubleBigDigit, from_lo_hi};
 use bigint::digit::constants::DIGIT_MAX;
 use bigint::sign::Sign;
 
@@ -41,8 +41,8 @@ pub(crate) fn short_divmod(dividend: &BigInt, divisor: BigDigit, return_remainde
     let mut carry: BigDigit = 0;
 
     for (d, q) in dividend.digits.iter().cloned().zip(quo.iter_mut()).rev() {
-        let res = (dbd_from_lo_hi([d, carry]) / divisor) as BigDigit;
-        let rem = (dbd_from_lo_hi([d, carry]) % divisor) as BigDigit;
+        let res = (from_lo_hi([d, carry]) / divisor) as BigDigit;
+        let rem = (from_lo_hi([d, carry]) % divisor) as BigDigit;
         *q = res;
         carry = rem;
     }
@@ -146,10 +146,9 @@ pub(crate) fn divmod(
 /// Sets dividend to dividend - q * divisor. If dividend is negative, it is left as the b's
 /// complement, where b is the radix of BigDigit.
 fn ssub_with_mul(dividend: &mut [BigDigit], divisor: &mut [BigDigit], q: BigDigit) -> bool {
-    let _carry = smul(divisor, q);
-    debug_assert_eq!(_carry, 0);
 
-    let mut carry = false;
+    let _carry = smul(divisor, q);
+    let mut carry: bool = false;
 
     assert_eq!(dividend.len(), divisor.len());
     for (l, r) in dividend.iter_mut().zip(divisor.iter().cloned()) {

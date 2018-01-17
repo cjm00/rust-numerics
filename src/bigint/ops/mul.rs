@@ -1,7 +1,7 @@
 use bigint::{BigDigit, BigInt, DoubleBigDigit};
 use bigint::Sign::*;
 
-use bigint::digit::lo_hi_digits;
+use bigint::digit::to_lo_hi;
 
 use std::ops::Mul;
 
@@ -47,7 +47,7 @@ pub(crate) fn naive_mul(lhs: &BigInt, rhs: &BigInt) -> BigInt {
             continue;
         }
         for (j, r) in rhs.digits.iter().cloned().enumerate() {
-            let [lo, hi] = lo_hi_digits(
+            let [lo, hi] = to_lo_hi(
                 l as DoubleBigDigit * r as DoubleBigDigit + digits[i + j] as DoubleBigDigit +
                     carry as DoubleBigDigit,
             );
@@ -71,7 +71,7 @@ pub(crate) fn smul(lhs: &mut [BigDigit], rhs: BigDigit) -> BigDigit {
     let rhs = rhs as DoubleBigDigit;
     let mut carry: BigDigit = 0;
     for d in lhs.iter_mut() {
-        let [lo, hi] = lo_hi_digits((*d as DoubleBigDigit * rhs) + carry as DoubleBigDigit);
+        let [lo, hi] = to_lo_hi((*d as DoubleBigDigit * rhs) + carry as DoubleBigDigit);
         *d = lo;
         carry = hi;
     }
